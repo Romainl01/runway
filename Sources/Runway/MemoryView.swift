@@ -227,7 +227,7 @@ struct MemoryView: View {
 /// its height); Stop asks inside the row; a stop in progress shimmers its second line.
 /// "✓ wander stopped · 874 MB freed", floating over the bottom of the list for 3 s after a stop.
 /// An ⓘ that shows its text in a popover as soon as the pointer is on it (a `.help` tooltip takes
-/// a second and Romain did not see it).
+/// a second to appear and is easy to miss).
 private struct InfoBubble: View {
     let text: String
     @State private var shown = false
