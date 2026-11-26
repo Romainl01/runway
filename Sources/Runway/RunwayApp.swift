@@ -8,9 +8,9 @@ struct RunwayApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            PopoverView(store: appDelegate.store)
+            PopoverView(store: appDelegate.store, ram: appDelegate.ram)
         } label: {
-            MenuBarLabel(store: appDelegate.store)
+            MenuBarLabel(store: appDelegate.store, ram: appDelegate.ram)
         }
         .menuBarExtraStyle(.window)
     }
@@ -19,6 +19,7 @@ struct RunwayApp: App {
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let store: UsageStore
+    let ram: RAMStore
     private let sink = UserNotificationSink()
     private let isPreview = CommandLine.arguments.contains("--preview-window")
     private let isFixture: Bool
@@ -69,6 +70,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                            notifier: ThresholdNotifier(ledger: ledger, sink: sink),
                            settings: { Preferences.notifierSettings() },
                            now: now)
+
+        let scanner: any MemoryScanning
+        let stopper: any MemoryStopping
+        if isFixture {
+            scanner = FixtureMemoryScanner()
+            stopper = NoopMemoryStopper()
+        } else {
+            // TODO(merge): SystemMemoryScanner() / ProcessStopper() (live mode); the fixture stands in until then.
+            scanner = FixtureMemoryScanner()
+            stopper = NoopMemoryStopper()
+        }
+        ram = RAMStore(scanner: scanner, stopper: stopper, now: now)
         super.init()
     }
 
@@ -86,10 +99,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         Cheatcodes.shared.applyAppearance()
         if !isFixture && !isPreview { sink.requestAuthorization() }
         store.start()
+        ram.start()
         // QA: RUNWAY_SCENARIO=<id> (calm, warning, critical, creditsCap, overflow, personal, loading,
-        // offline, expired, claudeCodeMissing) shows a cheatcode scenario at launch.
-        if let scenario = ProcessInfo.processInfo.environment["RUNWAY_SCENARIO"].flatMap(Scenario.init(rawValue:)) {
-            scenario.apply(to: store)
+        // offline, expired, claudeCodeMissing) shows a cheatcode scenario at launch; mem-<id> (mem-calm,
+        // mem-medium, mem-critical, mem-hover, mem-confirm, mem-stopping, mem-stopped, mem-busy,
+        // mem-loading, mem-overflow) does the same for the Memory tab.
+        if let id = ProcessInfo.processInfo.environment["RUNWAY_SCENARIO"] {
+            if let scenario = Scenario(rawValue: id) {
+                scenario.apply(to: store)
+            } else if let scenario = MemoryScenario(launchID: id) {
+                scenario.apply(to: ram)
+            }
         }
 
         NSWorkspace.shared.notificationCenter.addObserver(
@@ -126,7 +146,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// `--preview-window`: the popover content in a regular window, for screenshot QA.
     private func openPreviewWindow() {
         // Same system glass panel as the MenuBarExtra window, so the preview shows the real shape and border.
-        let hosting = NSHostingView(rootView: PopoverView(store: store))
+        let hosting = NSHostingView(rootView: PopoverView(store: store, ram: ram))
         let glass = NSGlassEffectView()
         glass.cornerRadius = Theme.popoverRadius
         glass.contentView = hosting

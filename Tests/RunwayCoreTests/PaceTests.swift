@@ -60,3 +60,26 @@ import Testing
         #expect(format.ago(now.addingTimeInterval(-8), now: now) == "8 s ago")
     }
 }
+
+@Suite struct MemoryFormatTests {
+    let format = RunwayFormat(timeZone: TimeZone(identifier: "Europe/Paris")!, locale: Locale(identifier: "en_GB"))
+    let gib: UInt64 = 1_073_741_824
+
+    @Test func bytes() {
+        #expect(format.bytes(gib * 21 / 10) == "2.1 GB")
+        #expect(format.bytes(512 * 1_048_576) == "512 MB")
+        #expect(format.totalGigabytes(gib * 32) == "32 GB")
+        #expect(format.gigabytesNumber(gib * 261 / 10) == "26.1")
+        #expect(format.wholeGigabytes(gib * 26 + gib / 10) == "26 GB")
+        let fr = RunwayFormat(locale: Locale(identifier: "fr_FR"))
+        #expect(fr.gigabytesNumber(gib * 21 / 10) == "2,1")
+    }
+
+    @Test func reasons() {
+        let now = Date()
+        #expect(format.reason(.idle(since: now.addingTimeInterval(-2.6 * 3600)), now: now) == "idle for 2 h")
+        #expect(format.reason(.noMessage(since: now.addingTimeInterval(-5 * 3600)), now: now) == "no message for 5 h")
+        #expect(format.reason(.noMessage(since: now.addingTimeInterval(-3 * 86400)), now: now) == "no message for 3 d")
+        #expect(format.reason(.orphan, now: now) == "orphan")
+    }
+}

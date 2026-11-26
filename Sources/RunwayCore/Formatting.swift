@@ -69,6 +69,58 @@ public struct RunwayFormat: Sendable {
             ?? String(format: "%.2f %@", amount, currency)
     }
 
+    // MARK: Memory
+
+    /// Numbers follow the copy's language, not the Mac's region: "2.1 GB" under an English UI even on a French Mac.
+    private var numberLocale: Locale { Locale(identifier: locale.language.languageCode?.identifier ?? "en") }
+
+    private static let gibibyte = 1_073_741_824.0
+    private static let mebibyte = 1_048_576.0
+
+    /// "2.1 GB" / "2,1 Go"; under 1 GB, "512 MB" / "512 Mo".
+    public func bytes(_ value: UInt64) -> String {
+        let gb = Double(value) / Self.gibibyte
+        if gb >= 0.95 { return tr("\(gigabytesNumber(value)) GB") }
+        let mb = Int((Double(value) / Self.mebibyte).rounded())
+        return tr("\(mb) MB")
+    }
+
+    /// "26.1" / "26,1": the number alone, one decimal (the unit sits elsewhere in the gauge value).
+    public func gigabytesNumber(_ value: UInt64) -> String {
+        (Double(value) / Self.gibibyte).formatted(.number.locale(numberLocale).precision(.fractionLength(1)))
+    }
+
+    /// "32 GB" / "32 Go" (total RAM, one decimal only when it is not whole).
+    public func totalGigabytes(_ value: UInt64) -> String {
+        let number = (Double(value) / Self.gibibyte).formatted(.number.locale(numberLocale).precision(.fractionLength(0...1)))
+        return tr("\(number) GB")
+    }
+
+    /// "26 GB" / "26 Go" (menu bar).
+    public func wholeGigabytes(_ value: UInt64) -> String {
+        let n = Int((Double(value) / Self.gibibyte).rounded())
+        return tr("\(n) GB")
+    }
+
+    /// Coarse span for reasons: "45 min", "2 h", "3 d" (never "2h 30m": a reason is not a stopwatch).
+    public func idleSpan(_ seconds: TimeInterval) -> String {
+        let s = max(0, seconds)
+        if s >= 86400 { let d = Int(s / 86400); return tr("\(d) d") }
+        if s >= 3600 { let h = Int(s / 3600); return tr("\(h) h") }
+        return duration(s)
+    }
+
+    /// "idle for 2h", "orphan"… (lowercase: it follows the context on the row's second line).
+    public func reason(_ reason: MemoryReason, now: Date) -> String {
+        switch reason {
+        case .noAppOpen: tr("no app open")
+        case .idle(let since): { let span = idleSpan(now.timeIntervalSince(since)); return tr("idle for \(span)") }()
+        case .orphan: tr("orphan")
+        case .duplicate: tr("duplicate")
+        case .noMessage(let since): { let span = idleSpan(now.timeIntervalSince(since)); return tr("no message for \(span)") }()
+        }
+    }
+
     /// "At this pace: ~41% at reset" / "At this pace: 100% at 16:08, 32 min before reset"
     public func paceLine(_ projection: PaceProjection) -> String {
         switch projection {

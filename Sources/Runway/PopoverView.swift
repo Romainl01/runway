@@ -2,27 +2,69 @@ import AppKit
 import RunwayCore
 import SwiftUI
 
+enum PopoverTab: String, CaseIterable, Identifiable {
+    case plan, memory
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .plan: tr("Plan")
+        case .memory: tr("Memory")
+        }
+    }
+
+    /// QA: RUNWAY_TAB=plan|memory opens on that tab (and stays the starting point until a tab is clicked).
+    static var fromEnvironment: PopoverTab? {
+        PopoverTab(rawValue: ProcessInfo.processInfo.environment["RUNWAY_TAB"] ?? "")
+    }
+}
+
 struct PopoverView: View {
     let store: UsageStore
+    let ram: RAMStore
 
     /// QA: RUNWAY_SCREEN=settings opens on the settings view.
     @State private var showingSettings = ProcessInfo.processInfo.environment["RUNWAY_SCREEN"] == "settings"
+    @AppStorage(PrefKey.tab) private var tabRaw = PopoverTab.plan.rawValue
+    @State private var forcedTab = PopoverTab.fromEnvironment
+    @State private var isOpen = false
+
+    private var tab: Binding<PopoverTab> {
+        Binding(get: { forcedTab ?? PopoverTab(rawValue: tabRaw) ?? .plan },
+                set: { forcedTab = nil; tabRaw = $0.rawValue })
+    }
 
     var body: some View {
         Group {
             if showingSettings {
                 SettingsView(onBack: { withAnimation(Theme.transition) { showingSettings = false } })
             } else {
-                UsageView(store: store, onSettings: { withAnimation(Theme.transition) { showingSettings = true } })
+                UsageView(store: store, ram: ram, tab: tab,
+                          onSettings: { withAnimation(Theme.transition) { showingSettings = true } })
             }
         }
         .transition(.opacity)
         .frame(width: Theme.popoverWidth)
         .modifier(PopoverSurface(glass: Cheatcodes.shared.theme == .glass))
-        .onAppear { store.refresh(.popoverOpened) }
+        .onAppear { isOpen = true; syncVisibility(); store.refresh(.popoverOpened) }
+        .onDisappear { isOpen = false; syncVisibility() }
+        .onChange(of: tabRaw) { syncVisibility() }
+        .onChange(of: forcedTab) { syncVisibility() }
+        .onChange(of: showingSettings) { syncVisibility() }
         .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { _ in
+            isOpen = true
+            syncVisibility()
             store.refresh(.popoverOpened)
         }
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.didResignKeyNotification)) { _ in
+            isOpen = false
+            syncVisibility()
+        }
+    }
+
+    /// The RAM store scans fast only while its tab is on screen.
+    private func syncVisibility() {
+        ram.isVisible = isOpen && !showingSettings && tab.wrappedValue == .memory
     }
 }
 
@@ -44,6 +86,8 @@ struct PopoverSurface: ViewModifier {
 
 struct UsageView: View {
     let store: UsageStore
+    let ram: RAMStore
+    @Binding var tab: PopoverTab
     var onSettings: () -> Void
 
     private let format = RunwayFormat()
@@ -52,29 +96,41 @@ struct UsageView: View {
     private var muted: Bool { store.state.isOffline || store.state == .expired }
 
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 1)) { _ in
-            let now = store.now()
-            VStack(alignment: .leading, spacing: 0) {
-                header(now: now)
+        VStack(alignment: .leading, spacing: 0) {
+            TimelineView(.periodic(from: .now, by: 1)) { _ in
+                header(now: store.now())
                     .padding(Theme.padding)
-                Hairline()
-                VStack(alignment: .leading, spacing: 16) {
-                    alert
-                    if let snapshot = store.snapshot {
-                        gauges(snapshot, now: now)
-                    } else if store.state == .loading {
-                        ProgressView().controlSize(.small).frame(maxWidth: .infinity, minHeight: 60)
-                    }
+            }
+            Hairline()
+            switch tab {
+            case .plan:
+                TimelineView(.periodic(from: .now, by: 1)) { _ in planBody(now: store.now()) }
+            case .memory:
+                MemoryView(ram: ram)
+            }
+        }
+    }
+
+    private func planBody(now: Date) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .leading, spacing: 16) {
+                alert
+                if let snapshot = store.snapshot {
+                    gauges(snapshot, now: now)
+                } else if store.state == .loading {
+                    ProgressView().controlSize(.small).frame(maxWidth: .infinity, minHeight: 60)
                 }
-                .padding(Theme.padding)
-                if let credits = store.snapshot?.credits {
-                    Hairline()
-                    creditsRow(credits).padding(Theme.padding)
-                }
+            }
+            .padding(Theme.padding)
+            if let credits = store.snapshot?.credits {
                 Hairline()
-                footer
-                    .padding(.horizontal, Theme.padding)
-                    .padding(.vertical, 12)
+                creditsRow(credits).padding(Theme.padding)
+            }
+            Hairline()
+            PopoverFooter {
+                Link(destination: URL(string: "https://claude.ai/settings/usage")!) {
+                    Text("Details on claude.ai ↗")
+                }
             }
         }
     }
@@ -83,7 +139,16 @@ struct UsageView: View {
 
     /// Right-click opens the cheatcodes (theme, scenarios).
     private func header(now: Date) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 12) {
+            titleRow
+            TabSwitcher(selection: $tab)
+            if tab == .plan { accountLines(now: now) }
+        }
+        .contentShape(.rect)
+        .contextMenu { CheatcodeMenu(store: store, ram: ram) }
+    }
+
+    private var titleRow: some View {
             HStack(spacing: 6) {
                 Text("Runway")
                     .font(.system(size: 13, weight: .semibold))
@@ -102,6 +167,10 @@ struct UsageView: View {
                 }
             }
             .frame(height: 24)
+    }
+
+    private func accountLines(now: Date) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
             if let account = store.account {
                 // The email gives way first: the account type is the part that answers "which plan is this".
                 HStack(spacing: 0) {
@@ -124,8 +193,6 @@ struct UsageView: View {
                 .foregroundStyle(store.state.isOffline ? AnyShapeStyle(Theme.red) : Theme.tertiary)
                 .lineLimit(1)
         }
-        .contentShape(.rect)
-        .contextMenu { CheatcodeMenu(store: store) }
     }
 
     private func subtitle(now: Date) -> String {
@@ -255,15 +322,15 @@ struct UsageView: View {
         }
         .accessibilityElement(children: .combine)
     }
+}
 
-    // MARK: Footer
+/// Footer shared by both tabs: a secondary link on the left, Quit on the right.
+struct PopoverFooter<Leading: View>: View {
+    @ViewBuilder var leading: () -> Leading
 
-    private var footer: some View {
+    var body: some View {
         HStack {
-            Link(destination: URL(string: "https://claude.ai/settings/usage")!) {
-                Text("Details on claude.ai ↗")
-            }
-            .modifier(HoverUnderline())
+            leading().modifier(HoverUnderline())
             Spacer()
             Button("Quit") { NSApp.terminate(nil) }
                 .keyboardShortcut("q")
@@ -271,6 +338,45 @@ struct UsageView: View {
         }
         .buttonStyle(.plain)
         .font(.system(size: 12))
+        .padding(.horizontal, Theme.padding)
+        .padding(.vertical, 12)
+    }
+}
+
+/// Segmented control, bordered, radius 6 ("Plan" | "Memory"). Instant: switching tabs is a core action.
+struct TabSwitcher: View {
+    @Binding var selection: PopoverTab
+
+    var body: some View {
+        HStack(spacing: 2) {
+            ForEach(PopoverTab.allCases) { tab in
+                TabButton(title: tab.label, selected: selection == tab) { selection = tab }
+            }
+        }
+        .padding(2)
+        .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).strokeBorder(Theme.border, lineWidth: 1))
+    }
+
+    private struct TabButton: View {
+        var title: String
+        var selected: Bool
+        var action: () -> Void
+        @State private var hovering = false
+
+        var body: some View {
+            Button(action: action) {
+                Text(title)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(selected || hovering ? Theme.text : Theme.secondary)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 22)
+                    .background(selected ? Theme.track : Theme.clear, in: .rect(cornerRadius: Theme.pillRadius))
+                    .contentShape(.rect)
+            }
+            .buttonStyle(.plain)
+            .onHover { hovering = $0 }
+            .accessibilityAddTraits(selected ? .isSelected : [])
+        }
     }
 }
 

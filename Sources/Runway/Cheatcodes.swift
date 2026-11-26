@@ -32,6 +32,10 @@ final class Cheatcodes {
         didSet { applyAppearance() }
     }
 
+    /// Memory scenarios only: a row shown hovered (Stop visible) or with its confirmation open.
+    var memoryHoverID: String?
+    var memoryConfirmID: String?
+
     /// Glass follows the system appearance, like the real macOS material.
     func applyAppearance() {
         NSApp.appearance = switch theme {
@@ -122,12 +126,109 @@ enum Scenario: String, CaseIterable, Identifiable {
     }
 }
 
+/// Memory tab scenarios (RUNWAY_SCENARIO=mem-<id>), drawn over the live scan by `RAMStore.simulate`.
+enum MemoryScenario: String, CaseIterable, Identifiable {
+    case medium, calm, critical, hover, confirm, stopping, stopped, busy, loading, overflow
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .medium: tr("Memory · medium pressure")
+        case .calm: tr("Memory · calm")
+        case .critical: tr("Memory · critical, not responding")
+        case .hover: tr("Memory · row hovered")
+        case .confirm: tr("Memory · stop confirmation")
+        case .stopping: tr("Memory · stopping")
+        case .stopped: tr("Memory · stopped")
+        case .busy: tr("Memory · Claude answering")
+        case .loading: tr("Memory · loading")
+        case .overflow: tr("Memory · overflow")
+        }
+    }
+
+    /// "mem-calm" -> .calm
+    init?(launchID: String) {
+        guard launchID.hasPrefix("mem-") else { return nil }
+        self.init(rawValue: String(launchID.dropFirst(4)))
+    }
+
+    @MainActor
+    func apply(to ram: RAMStore) {
+        let cheats = Cheatcodes.shared
+        cheats.memoryHoverID = nil
+        cheats.memoryConfirmID = nil
+        var snapshot = FixtureMemory.snapshot(now: ram.now())
+        let gib: UInt64 = 1_073_741_824
+        var states: [String: StopState] = [:]
+
+        func edit(_ id: String, _ change: (inout MemoryItem) -> Void) {
+            for g in snapshot.groups.indices {
+                for i in snapshot.groups[g].items.indices where snapshot.groups[g].items[i].id == id {
+                    change(&snapshot.groups[g].items[i])
+                }
+            }
+        }
+
+        switch self {
+        case .medium:
+            break
+        case .calm:
+            snapshot.pressure = .normal
+            snapshot.usedBytes = gib * 14 + gib / 5
+            for g in snapshot.groups.indices {
+                for i in snapshot.groups[g].items.indices { snapshot.groups[g].items[i].reason = nil }
+            }
+        case .critical:
+            snapshot.pressure = .critical
+            snapshot.usedBytes = gib * 31 + gib * 2 / 5
+            states["srv-my-app"] = .notResponding
+        case .hover:
+            cheats.memoryHoverID = "sim-iphone-16-pro"
+        case .confirm:
+            cheats.memoryHoverID = "sim-iphone-16-pro"
+            cheats.memoryConfirmID = "sim-iphone-16-pro"
+        case .stopping:
+            cheats.memoryHoverID = "sim-iphone-16-pro"
+            states["sim-iphone-16-pro"] = .stopping
+        case .stopped:
+            states["sim-iphone-16-pro"] = .stopped(freedBytes: gib * 21 / 10)
+        case .busy:
+            edit("claude-dark-mode") { $0.isBusy = true }
+            cheats.memoryHoverID = "claude-dark-mode"
+            cheats.memoryConfirmID = "claude-dark-mode"
+        case .loading:
+            ram.simulate(MemoryPresentation(snapshot: nil))
+            return
+        case .overflow:
+            edit("sim-iphone-16-pro") {
+                $0.name = "iPhone 16 Pro Max with an extremely long device name"
+                $0.context = "A very long application name that goes on and on"
+            }
+            edit("srv-my-app") {
+                $0.name = "my-app-with-a-very-long-project-name-in-a-monorepo"
+                $0.context = "expo start --dev-client --clear --port 8081"
+            }
+            edit("claude-paywall") {
+                $0.name = "Fix the onboarding paywall and then rework the whole settings screen layout"
+                $0.context = "my-app-with-a-very-long-project-name-in-a-monorepo"
+            }
+            edit("app-browser") { $0.name = "A browser whose name is far too long to fit on one line"; $0.bytes = gib * 12 + gib / 3 }
+        }
+        ram.simulate(MemoryPresentation(snapshot: snapshot, stopStates: states))
+    }
+}
+
 /// The context menu itself.
 struct CheatcodeMenu: View {
     let store: UsageStore
+    let ram: RAMStore
     @Bindable private var cheats = Cheatcodes.shared
 
-    init(store: UsageStore) { self.store = store }
+    init(store: UsageStore, ram: RAMStore) {
+        self.store = store
+        self.ram = ram
+    }
 
     var body: some View {
         Picker("Theme", selection: $cheats.theme) {
@@ -145,8 +246,18 @@ struct CheatcodeMenu: View {
                 Button(scenario.label) { scenario.apply(to: store) }
             }
         }
+        Section("Memory") {
+            ForEach(MemoryScenario.allCases) { scenario in
+                Button(scenario.label) { scenario.apply(to: ram) }
+            }
+        }
         Divider()
-        Button("Back to live data") { store.resumeLive() }
-            .disabled(!store.isSimulating)
+        Button("Back to live data") {
+            store.resumeLive()
+            cheats.memoryHoverID = nil
+            cheats.memoryConfirmID = nil
+            ram.resumeLive()
+        }
+        .disabled(!store.isSimulating && !ram.isSimulating)
     }
 }
