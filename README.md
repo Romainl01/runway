@@ -101,6 +101,9 @@ RUNWAY_FIXTURE=Tests/Fixtures/usage-sample.json RUNWAY_NOW=2026-11-26T13:47:00Z 
 - `RUNWAY_NOW=<ISO 8601>`: shifts the clock so the fixture's reset times stay in the future.
 - `RUNWAY_THEME=system|light|dark|glass`: starting theme.
 - `RUNWAY_SCENARIO=<id>`: shows a scenario at launch (`calm`, `warning`, `critical`, `creditsCap`, `overflow`, `personal`, `loading`, `offline`, `expired`, `claudeCodeMissing`).
+- `RUNWAY_SCENARIO=mem-<id>`: same for the Memory tab (`mem-medium`, `mem-calm`, `mem-critical`, `mem-hover`, `mem-confirm`, `mem-stopping`, `mem-stopped`, `mem-busy`, `mem-loading`, `mem-overflow`).
+- `RUNWAY_TAB=plan|memory`: opens on that tab.
+- `RUNWAY_LIVE_MEMORY=1` (with a fixture): this Mac's real processes in the Memory tab, with a Stop that never signals anything.
 - `RUNWAY_SCREEN=settings`: opens on the settings screen.
 - `RUNWAY_OPEN_MENU=1`: opens the real menu bar panel after launch.
 - `RUNWAY_DUMP_MENUBAR=<dir>`: exports sample menu bar labels as PNG.

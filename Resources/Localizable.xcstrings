@@ -17,6 +17,38 @@
         }
       }
     },
+    "%@ GB": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ GB"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Go"
+          }
+        }
+      }
+    },
+    "%@ stopped": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ stopped"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ arrêté"
+          }
+        }
+      }
+    },
     "%@ · back at %@": {
       "localizations": {
         "en": {
@@ -49,6 +81,54 @@
         }
       }
     },
+    "%lld GB": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld GB"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Go"
+          }
+        }
+      }
+    },
+    "%lld MB": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld MB"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Mo"
+          }
+        }
+      }
+    },
+    "%lld d": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld d"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld j"
+          }
+        }
+      }
+    },
     "%lld d ago": {
       "localizations": {
         "en": {
@@ -61,6 +141,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "il y a %lld j"
+          }
+        }
+      }
+    },
+    "%lld h": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld h"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld h"
           }
         }
       }
@@ -209,6 +305,38 @@
         }
       }
     },
+    "Activity Monitor ↗": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activity Monitor ↗"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moniteur d’activité ↗"
+          }
+        }
+      }
+    },
+    "Apps": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apps"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apps"
+          }
+        }
+      }
+    },
     "At this pace: 100%% at %@, %@ before reset": {
       "localizations": {
         "en": {
@@ -305,6 +433,22 @@
         }
       }
     },
+    "Cancel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annuler"
+          }
+        }
+      }
+    },
     "Can’t read usage right now. Runway will retry on its own in a few minutes.": {
       "localizations": {
         "en": {
@@ -333,6 +477,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Plafond atteint"
+          }
+        }
+      }
+    },
+    "Claude Code": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code"
           }
         }
       }
@@ -417,6 +577,22 @@
         }
       }
     },
+    "Claude is answering": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude is answering"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude est en train de répondre"
+          }
+        }
+      }
+    },
     "Claude is limiting how often usage can be read. Values will return at %@.": {
       "localizations": {
         "en": {
@@ -461,6 +637,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Crédits · plafond atteint"
+          }
+        }
+      }
+    },
+    "Critical pressure": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Critical pressure"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pression critique"
           }
         }
       }
@@ -557,6 +749,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Erreur %lld"
+          }
+        }
+      }
+    },
+    "Force stop": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Force stop"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forcer l’arrêt"
           }
         }
       }
@@ -673,6 +881,246 @@
         }
       }
     },
+    "Local servers": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local servers"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serveurs locaux"
+          }
+        }
+      }
+    },
+    "Medium pressure": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medium pressure"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pression moyenne"
+          }
+        }
+      }
+    },
+    "Memory": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mémoire"
+          }
+        }
+      }
+    },
+    "Memory in use right now, out of %@. macOS keeps it nearly full on purpose. The pressure tells whether it is struggling.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory in use right now, out of %@. macOS keeps it nearly full on purpose. The pressure tells whether it is struggling."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La mémoire vive utilisée en ce moment, sur %@. macOS la garde presque pleine exprès. La pression dit s'il peine."
+          }
+        }
+      }
+    },
+    "Memory · Claude answering": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory · Claude answering"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mémoire · Claude répond"
+          }
+        }
+      }
+    },
+    "Memory · calm": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory · calm"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mémoire · calme"
+          }
+        }
+      }
+    },
+    "Memory · critical, not responding": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory · critical, not responding"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mémoire · critique, ne répond pas"
+          }
+        }
+      }
+    },
+    "Memory · loading": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory · loading"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mémoire · chargement"
+          }
+        }
+      }
+    },
+    "Memory · medium pressure": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory · medium pressure"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mémoire · pression moyenne"
+          }
+        }
+      }
+    },
+    "Memory · overflow": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory · overflow"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mémoire · texte long"
+          }
+        }
+      }
+    },
+    "Memory · row hovered": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory · row hovered"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mémoire · ligne survolée"
+          }
+        }
+      }
+    },
+    "Memory · stop confirmation": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory · stop confirmation"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mémoire · confirmation d’arrêt"
+          }
+        }
+      }
+    },
+    "Memory · stop toast": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory · stop toast"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mémoire · toast d'arrêt"
+          }
+        }
+      }
+    },
+    "Memory · stopped": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory · stopped"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mémoire · arrêté"
+          }
+        }
+      }
+    },
+    "Memory · stopping": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory · stopping"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mémoire · arrêt en cours"
+          }
+        }
+      }
+    },
     "Menu bar": {
       "localizations": {
         "en": {
@@ -717,6 +1165,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pas de session en cours"
+          }
+        }
+      }
+    },
+    "Normal pressure": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Normal pressure"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pression normale"
           }
         }
       }
@@ -897,6 +1361,22 @@
         }
       }
     },
+    "Plan": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plan"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forfait"
+          }
+        }
+      }
+    },
     "Quit": {
       "localizations": {
         "en": {
@@ -909,6 +1389,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Quitter"
+          }
+        }
+      }
+    },
+    "RAM": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RAM"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RAM"
           }
         }
       }
@@ -993,6 +1489,22 @@
         }
       }
     },
+    "Scanning processes…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scanning processes…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analyse des processus…"
+          }
+        }
+      }
+    },
     "Service unavailable (%lld)": {
       "localizations": {
         "en": {
@@ -1073,6 +1585,22 @@
         }
       }
     },
+    "Simulators": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Simulators"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Simulateurs"
+          }
+        }
+      }
+    },
     "States": {
       "localizations": {
         "en": {
@@ -1085,6 +1613,102 @@
           "stringUnit": {
             "state": "translated",
             "value": "États"
+          }
+        }
+      }
+    },
+    "Stop": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrêter"
+          }
+        }
+      }
+    },
+    "Stop %@?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop %@?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrêter %@ ?"
+          }
+        }
+      }
+    },
+    "Stop anyway": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop anyway"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrêter quand même"
+          }
+        }
+      }
+    },
+    "Stopped · %@ freed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopped · %@ freed"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrêté · %@ libérés"
+          }
+        }
+      }
+    },
+    "Stopping…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopping…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrêt en cours…"
+          }
+        }
+      }
+    },
+    "Swap (on disk)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap (on disk)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap (sur le disque)"
           }
         }
       }
@@ -1121,6 +1745,54 @@
         }
       }
     },
+    "The app and its data stay installed.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The app and its data stay installed."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’app et ses données restent installées."
+          }
+        }
+      }
+    },
+    "The conversation can be resumed with": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The conversation can be resumed with"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La conversation reste reprenable avec"
+          }
+        }
+      }
+    },
+    "The server stops; restart it from its terminal.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The server stops; restart it from its terminal."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le serveur s’arrête ; relancez-le depuis son terminal."
+          }
+        }
+      }
+    },
     "Theme": {
       "localizations": {
         "en": {
@@ -1149,6 +1821,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Réponse illisible"
+          }
+        }
+      }
+    },
+    "Unsaved work may be lost.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unsaved work may be lost."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le travail non enregistré peut être perdu."
           }
         }
       }
@@ -1265,6 +1953,22 @@
         }
       }
     },
+    "What no longer fits in RAM waits on the disk. The more there is, the slower the Mac gets when you go back to an app. The rows below count their share in RAM and on disk.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What no longer fits in RAM waits on the disk. The more there is, the slower the Mac gets when you go back to an app. The rows below count their share in RAM and on disk."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce qui ne tient plus en RAM attend sur le disque. Plus il y en a, plus le Mac ralentit quand tu reviens sur une app. Les lignes en dessous comptent leur part en RAM et sur le disque."
+          }
+        }
+      }
+    },
     "Your %@ session starts over from zero.": {
       "localizations": {
         "en": {
@@ -1277,6 +1981,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ta session de %@ repart de zéro."
+          }
+        }
+      }
+    },
+    "duplicate": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "duplicate"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "doublon"
+          }
+        }
+      }
+    },
+    "idle for %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "idle for %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "inactif depuis %@"
           }
         }
       }
@@ -1329,6 +2065,70 @@
         }
       }
     },
+    "memory %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "memory %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "mémoire %@"
+          }
+        }
+      }
+    },
+    "no app open": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "no app open"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucune app ouverte"
+          }
+        }
+      }
+    },
+    "no message for %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "no message for %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucun message depuis %@"
+          }
+        }
+      }
+    },
+    "not responding": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "not responding"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ne répond pas"
+          }
+        }
+      }
+    },
     "now": {
       "localizations": {
         "en": {
@@ -1341,6 +2141,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "maintenant"
+          }
+        }
+      }
+    },
+    "orphan": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "orphan"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "orphelin"
           }
         }
       }
@@ -1373,6 +2189,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "semaine %@"
+          }
+        }
+      }
+    },
+    "· %@ freed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "· %@ freed"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "· %@ libérés"
           }
         }
       }
