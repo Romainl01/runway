@@ -154,7 +154,8 @@ struct UsageView: View {
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Theme.text)
                     .padding(.trailing, 2)
-                if let plan = store.plan {
+                // The plan is about usage: off the Memory tab.
+                if tab == .plan, let plan = store.plan {
                     Pill(text: plan)
                 }
                 Spacer(minLength: 8)

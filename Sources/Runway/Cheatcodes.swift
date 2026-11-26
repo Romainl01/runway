@@ -128,7 +128,7 @@ enum Scenario: String, CaseIterable, Identifiable {
 
 /// Memory tab scenarios (RUNWAY_SCENARIO=mem-<id>), drawn over the live scan by `RAMStore.simulate`.
 enum MemoryScenario: String, CaseIterable, Identifiable {
-    case medium, calm, critical, hover, confirm, stopping, stopped, busy, loading, overflow
+    case medium, calm, critical, hover, confirm, stopping, stopped, toast, busy, loading, overflow
 
     var id: String { rawValue }
 
@@ -141,6 +141,7 @@ enum MemoryScenario: String, CaseIterable, Identifiable {
         case .confirm: tr("Memory · stop confirmation")
         case .stopping: tr("Memory · stopping")
         case .stopped: tr("Memory · stopped")
+        case .toast: tr("Memory · stop toast")
         case .busy: tr("Memory · Claude answering")
         case .loading: tr("Memory · loading")
         case .overflow: tr("Memory · overflow")
@@ -193,6 +194,9 @@ enum MemoryScenario: String, CaseIterable, Identifiable {
             states["sim-iphone-16-pro"] = .stopping
         case .stopped:
             states["sim-iphone-16-pro"] = .stopped(freedBytes: gib * 21 / 10)
+        case .toast:
+            // Held long enough to look at (and capture).
+            ram.showToast(StopToast(name: "my-app", freedBytes: 874 * 1_048_576), duration: 30)
         case .busy:
             edit("claude-dark-mode") { $0.isBusy = true }
             cheats.memoryHoverID = "claude-dark-mode"

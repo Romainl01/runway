@@ -46,7 +46,8 @@ public final class SystemMemoryScanner: MemoryScanning, @unchecked Sendable {
     func scanSync(now: Date) -> MemorySnapshot {
         let groups = self.groups(now: now)
         return MemorySnapshot(usedBytes: SystemMemory.usedBytes(), totalBytes: SystemMemory.totalBytes,
-                              pressure: SystemMemory.pressure(), groups: groups, scannedAt: now)
+                              pressure: SystemMemory.pressure(), swapUsedBytes: SystemMemory.swapUsedBytes(),
+                              groups: groups, scannedAt: now)
     }
 
     func groups(now: Date) -> [MemoryGroup] {

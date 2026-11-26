@@ -92,14 +92,19 @@ public struct MemorySnapshot: Equatable, Sendable {
     public var usedBytes: UInt64
     public var totalBytes: UInt64
     public var pressure: MemoryPressure
+    /// Swap in use. Per-item values are phys_footprint, which counts compressed and swapped pages:
+    /// with a big swap, the items add up to more than the RAM, and the meta line says why.
+    public var swapUsedBytes: UInt64
     /// Simulators, servers, Claude Code, apps, in that order; empty groups left out.
     public var groups: [MemoryGroup]
     public var scannedAt: Date
 
-    public init(usedBytes: UInt64, totalBytes: UInt64, pressure: MemoryPressure, groups: [MemoryGroup], scannedAt: Date) {
+    public init(usedBytes: UInt64, totalBytes: UInt64, pressure: MemoryPressure, swapUsedBytes: UInt64 = 0,
+                groups: [MemoryGroup], scannedAt: Date) {
         self.usedBytes = usedBytes
         self.totalBytes = totalBytes
         self.pressure = pressure
+        self.swapUsedBytes = swapUsedBytes
         self.groups = groups
         self.scannedAt = scannedAt
     }

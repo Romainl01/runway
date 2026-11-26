@@ -33,6 +33,38 @@
         }
       }
     },
+    "%@ stopped": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ stopped"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ arrêté"
+          }
+        }
+      }
+    },
+    "%@ · %@ in swap": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %@ in swap"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %@ en swap"
+          }
+        }
+      }
+    },
     "%@ · back at %@": {
       "localizations": {
         "en": {
@@ -1037,6 +1069,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mémoire · confirmation d’arrêt"
+          }
+        }
+      }
+    },
+    "Memory · stop toast": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory · stop toast"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mémoire · toast d'arrêt"
           }
         }
       }
@@ -2093,6 +2141,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "semaine %@"
+          }
+        }
+      }
+    },
+    "· %@ freed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "· %@ freed"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "· %@ libérés"
           }
         }
       }

@@ -12,6 +12,18 @@ public struct MemoryPresentation: Equatable, Sendable {
     }
 }
 
+/// "wander stopped · 874 MB freed", shown a few seconds after a stop succeeds.
+public struct StopToast: Equatable, Sendable, Identifiable {
+    public var id = UUID()
+    public var name: String
+    public var freedBytes: UInt64
+
+    public init(name: String, freedBytes: UInt64) {
+        self.name = name
+        self.freedBytes = freedBytes
+    }
+}
+
 /// Scans memory on a loop and runs the Stop buttons. No network, so no `CallGate`: a scan is a few
 /// ms of libproc. Faster while the Memory tab is visible, slow otherwise (the menu bar shows the Go).
 @MainActor
@@ -23,6 +35,7 @@ public final class RAMStore {
     private var ghosts: [String: (item: MemoryItem, until: Date)] = [:]
 
     public var snapshot: MemorySnapshot? { (simulated ?? live).snapshot }
+    public private(set) var toast: StopToast?
     public var isSimulating: Bool { simulated != nil }
 
     /// While the Memory tab is on screen.
@@ -33,6 +46,7 @@ public final class RAMStore {
     public static let visibleInterval: TimeInterval = 5
     public static let backgroundInterval: TimeInterval = 30
     public static let ghostDuration: TimeInterval = 4
+    public static let toastDuration: TimeInterval = 3
 
     @ObservationIgnored private let scanner: any MemoryScanning
     @ObservationIgnored private let stopper: any MemoryStopping
@@ -124,10 +138,20 @@ public final class RAMStore {
             case .stopped, .gone:
                 live.stopStates[item.id] = .stopped(freedBytes: item.bytes)
                 ghosts[item.id] = (item, now().addingTimeInterval(Self.ghostDuration))
+                showToast(StopToast(name: item.name, freedBytes: item.bytes))
             case .notResponding:
                 live.stopStates[item.id] = .notResponding
             }
             await scanOnce()
+        }
+    }
+
+    /// Also used by the cheatcodes. A newer toast replaces the current one and restarts its delay.
+    public func showToast(_ toast: StopToast, duration: TimeInterval = RAMStore.toastDuration) {
+        self.toast = toast
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(duration))
+            if self?.toast?.id == toast.id { self?.toast = nil }
         }
     }
 

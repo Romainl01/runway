@@ -71,6 +71,15 @@ struct MemoryView: View {
             .scrollBounceBehavior(.basedOnSize)
             .scrollIndicators(.automatic)
             .frame(height: min(listHeight, Self.maxListHeight))
+            .overlay(alignment: .bottom) {
+                if let toast = ram.toast {
+                    StopToastView(toast: toast)
+                        .padding(.horizontal, Theme.padding)
+                        .padding(.bottom, 12)
+                        .transition(.opacity.combined(with: .offset(y: 6)))
+                }
+            }
+            .animation(Theme.transition, value: ram.toast)
             Hairline()
             PopoverFooter {
                 Button("Activity Monitor ↗") {
@@ -103,7 +112,10 @@ struct MemoryView: View {
             Gauge(percent: (snapshot?.usedFraction ?? 0) * 100, muted: false, fill: snapshot?.pressure.fill)
             Group {
                 if let snapshot {
-                    Text(snapshot.pressure.label)
+                    // A big swap is why the rows add up to more than the RAM: say it.
+                    Text(snapshot.swapUsedBytes >= 1 << 30
+                         ? tr("\(snapshot.pressure.label) · \(format.bytes(snapshot.swapUsedBytes)) in swap")
+                         : snapshot.pressure.label)
                         .foregroundStyle(snapshot.pressure == .critical ? AnyShapeStyle(Theme.red) : Theme.tertiary)
                 } else {
                     Text("Scanning processes…").foregroundStyle(Theme.tertiary)
@@ -185,6 +197,37 @@ struct MemoryView: View {
 
 /// Two lines, always: name + value, then context · reason. Hover swaps the value for "Stop" (the row keeps
 /// its height); Stop asks inside the row; a stop in progress shimmers its second line.
+/// "✓ wander stopped · 874 MB freed", floating over the bottom of the list for 3 s after a stop.
+private struct StopToastView: View {
+    let toast: StopToast
+    private let format = RunwayFormat()
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 13))
+                .foregroundStyle(.black, Theme.green)
+            Text(tr("\(toast.name) stopped"))
+                .foregroundStyle(Theme.text)
+                .lineLimit(1)
+                .truncationMode(.middle)
+            Text(tr("· \(format.bytes(toast.freedBytes)) freed"))
+                .foregroundStyle(Theme.secondary)
+                .lineLimit(1)
+                .fixedSize()
+            Spacer(minLength: 0)
+        }
+        .font(.system(size: 12))
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(Theme.surface, in: .rect(cornerRadius: Theme.controlRadius))
+        .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).strokeBorder(Theme.border, lineWidth: 1))
+        .shadow(color: .black.opacity(0.35), radius: 8, y: 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isStaticText)
+    }
+}
+
 private struct MemoryRow: View {
     let item: MemoryItem
     let state: StopState?

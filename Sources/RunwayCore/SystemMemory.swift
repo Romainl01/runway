@@ -21,6 +21,14 @@ public enum SystemMemory {
         return pages * UInt64(getpagesize())
     }
 
+    /// `vm.swapusage`: swap in use.
+    public static func swapUsedBytes() -> UInt64 {
+        var usage = xsw_usage()
+        var size = MemoryLayout<xsw_usage>.size
+        guard sysctlbyname("vm.swapusage", &usage, &size, nil, 0) == 0 else { return 0 }
+        return usage.xsu_used
+    }
+
     public static var totalBytes: UInt64 { ProcessInfo.processInfo.physicalMemory }
 
     /// `kern.memorystatus_vm_pressure_level`: 1 normal, 2 warning, 4 critical.
