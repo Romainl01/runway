@@ -73,13 +73,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let scanner: any MemoryScanning
         let stopper: any MemoryStopping
-        if isFixture {
+        if isFixture && env["RUNWAY_LIVE_MEMORY"] != nil {
+            // QA: this Mac's real processes, with a stopper that never signals anything.
+            scanner = SystemMemoryScanner()
+            stopper = NoopMemoryStopper()
+        } else if isFixture {
             scanner = FixtureMemoryScanner()
             stopper = NoopMemoryStopper()
         } else {
-            // TODO(merge): SystemMemoryScanner() / ProcessStopper() (live mode); the fixture stands in until then.
-            scanner = FixtureMemoryScanner()
-            stopper = NoopMemoryStopper()
+            scanner = SystemMemoryScanner()
+            stopper = ProcessStopper()
         }
         ram = RAMStore(scanner: scanner, stopper: stopper, now: now)
         super.init()

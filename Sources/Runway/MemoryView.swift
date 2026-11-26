@@ -49,6 +49,9 @@ struct MemoryView: View {
     private static let maxListHeight: CGFloat = 560
 
     @State private var confirmingID: String?
+    /// A ScrollView has no height of its own: in the MenuBarExtra panel it collapsed to 0. It takes
+    /// its content's height, up to the cap.
+    @State private var listHeight: CGFloat = 0
     @Bindable private var cheats = Cheatcodes.shared
 
     var body: some View {
@@ -63,10 +66,11 @@ struct MemoryView: View {
                 }
                 .padding(.horizontal, Theme.padding)
                 .padding(.vertical, 12)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { listHeight = $0 }
             }
             .scrollBounceBehavior(.basedOnSize)
             .scrollIndicators(.automatic)
-            .frame(maxHeight: Self.maxListHeight)
+            .frame(height: min(listHeight, Self.maxListHeight))
             Hairline()
             PopoverFooter {
                 Button("Activity Monitor ↗") {
