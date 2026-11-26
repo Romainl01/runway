@@ -8,6 +8,7 @@ enum PrefKey {
     static let weeklyThresholds = "runway.weeklyThresholds"
     static let menuBarMode = "runway.menuBarMode"
     static let notifySessionReset = "runway.notifySessionReset"
+    static let tab = "runway.tab"
 }
 
 enum MenuBarMode: String, CaseIterable, Identifiable {

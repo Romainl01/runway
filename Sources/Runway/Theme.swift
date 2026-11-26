@@ -32,6 +32,7 @@ enum Theme {
         static let track = dynamic(dark: 0x262626, light: 0xEAEAEA)
     }
 
+    static let green = Color(nsColor: .runwayGreen)
     static let amber = Color(nsColor: .runwayAmber)
     static let red = Color(nsColor: .runwayRed)
 
@@ -69,10 +70,10 @@ enum SeverityLevel: Equatable {
         }
     }
 
-    /// Gauge fill: text colour < 80 %, amber ≥ 80 %, red ≥ 95 %.
+    /// Gauge fill: green < 80 %, amber ≥ 80 %, red ≥ 95 %.
     @MainActor var fill: AnyShapeStyle {
         switch self {
-        case .normal: Theme.text
+        case .normal: AnyShapeStyle(Theme.green)
         case .warning: AnyShapeStyle(Theme.amber)
         case .critical: AnyShapeStyle(Theme.red)
         }
@@ -86,7 +87,9 @@ extension Color {
 }
 
 extension NSColor {
-    /// The two alert colours, shared by the popover and the menu bar image.
+    /// Gauge colours, shared by the popover and the menu bar image. Green is #30A46C: 3.2:1 on the light
+    /// background, 6.2:1 on the dark one (graphics need 3:1), so one value serves both appearances.
+    static let runwayGreen = NSColor(hex: 0x30A46C)
     static let runwayAmber = NSColor(hex: 0xF5A524)
     static let runwayRed = NSColor(hex: 0xE5484D)
 
@@ -102,6 +105,8 @@ extension NSColor {
 struct Gauge: View {
     var percent: Double
     var muted: Bool
+    /// Overrides the severity colour (the memory gauge follows the system's pressure, not the percentage).
+    var fill: AnyShapeStyle?
 
     var body: some View {
         GeometryReader { geo in
@@ -109,7 +114,7 @@ struct Gauge: View {
             ZStack(alignment: .leading) {
                 RoundedRectangle(cornerRadius: 2).fill(Theme.track)
                 RoundedRectangle(cornerRadius: 2)
-                    .fill(muted ? Theme.tertiary : SeverityLevel(percent: percent).fill)
+                    .fill(muted ? Theme.tertiary : (fill ?? SeverityLevel(percent: percent).fill))
                     .frame(width: geo.size.width * fraction)
             }
         }
@@ -212,4 +217,67 @@ struct MonoToggleStyle: ToggleStyle {
         .buttonStyle(.plain)
         .accessibilityValue(configuration.isOn ? tr("On") : tr("Off"))
     }
+}
+
+/// Small bordered button (22 pt, radius 6): "Stop", "Cancel", "Force stop". `solid` is the confirming one.
+struct SmallButtonStyle: ButtonStyle {
+    var solid = false
+
+    func makeBody(configuration: Configuration) -> some View {
+        SmallButtonBody(configuration: configuration, solid: solid)
+    }
+
+    private struct SmallButtonBody: View {
+        let configuration: Configuration
+        let solid: Bool
+        @State private var hovering = false
+
+        var body: some View {
+            configuration.label
+                .font(.system(size: 11, weight: .medium))
+                .lineLimit(1)
+                .foregroundStyle(solid ? Theme.background : Theme.text)
+                .padding(.horizontal, 8)
+                .frame(height: 22)
+                .background(solid ? Theme.text : (hovering ? Theme.surface : Theme.clear), in: .rect(cornerRadius: Theme.controlRadius))
+                .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).strokeBorder(solid ? Theme.text : Theme.border, lineWidth: 1))
+                .opacity(configuration.isPressed ? 0.7 : 1)
+                .contentShape(.rect)
+                .onHover { hovering = $0 }
+                .fixedSize()
+        }
+    }
+}
+
+/// The one moving thing besides the refresh icon: a highlight sweeping across the text of a row being
+/// stopped (design.md §5). 1.4 s linear; plain secondary text under Reduce Motion. Nowhere else.
+struct Shimmer: ViewModifier {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        if reduceMotion {
+            content.foregroundStyle(Theme.secondary)
+        } else {
+            content
+                .foregroundStyle(Theme.tertiary)
+                .overlay {
+                    TimelineView(.animation) { context in
+                        GeometryReader { geo in
+                            let phase = context.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 1.4) / 1.4
+                            let band = max(geo.size.width * 0.6, 24)
+                            LinearGradient(colors: [.clear, Color(nsColor: .labelColor), .clear],
+                                           startPoint: .leading, endPoint: .trailing)
+                                .frame(width: band)
+                                .offset(x: -band + (geo.size.width + band) * phase)
+                        }
+                    }
+                    .mask(content)
+                    .allowsHitTesting(false)
+                }
+        }
+    }
+}
+
+extension View {
+    func shimmer() -> some View { modifier(Shimmer()) }
 }
