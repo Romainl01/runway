@@ -106,6 +106,7 @@ struct MemoryView: View {
         return VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 6) {
                 valueRow(label: tr("RAM"),
+                         info: tr("Memory in use right now, out of \(totalText). macOS keeps it nearly full on purpose. The pressure tells whether it is struggling."),
                          value: snapshot.map { format.gigabytesNumber($0.usedBytes) } ?? "–",
                          suffix: " / " + totalText)
                 Gauge(percent: (snapshot?.usedFraction ?? 0) * 100, muted: false, fill: snapshot?.pressure.fill)
@@ -119,28 +120,29 @@ struct MemoryView: View {
                 }
                 .font(.system(size: 11))
             }
-            .contentShape(.rect)
-            .help(tr("Memory in use right now, out of \(totalText). macOS keeps it nearly full on purpose. The pressure tells whether it is struggling."))
             .accessibilityElement(children: .combine)
 
             if let snapshot {
                 VStack(alignment: .leading, spacing: 6) {
-                    valueRow(label: tr("Swap (on disk)"), value: format.bytes(snapshot.swapUsedBytes), suffix: nil)
+                    valueRow(label: tr("Swap (on disk)"),
+                             info: tr("What no longer fits in RAM waits on the disk. The more there is, the slower the Mac gets when you go back to an app. The rows below count their share in RAM and on disk."),
+                             value: format.bytes(snapshot.swapUsedBytes), suffix: nil)
                     Gauge(percent: min(Double(snapshot.swapUsedBytes) / Double(max(total, 1)), 1) * 100, muted: false,
                           fill: AnyShapeStyle(snapshot.pressure.color.opacity(0.6)))
                 }
-                .contentShape(.rect)
-                .help(tr("What no longer fits in RAM waits on the disk. The more there is, the slower the Mac gets when you go back to an app. The rows below count their share in RAM and on disk."))
                 .accessibilityElement(children: .combine)
             }
         }
     }
 
-    private func valueRow(label: String, value: String, suffix: String?) -> some View {
+    private func valueRow(label: String, info: String, value: String, suffix: String?) -> some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(label)
-                .font(.system(size: 12))
-                .foregroundStyle(Theme.secondary)
+            HStack(spacing: 4) {
+                Text(label)
+                    .font(.system(size: 12))
+                    .foregroundStyle(Theme.secondary)
+                InfoBubble(text: info)
+            }
             Spacer()
             HStack(spacing: 0) {
                 Text(verbatim: value).foregroundStyle(Theme.text)
@@ -224,6 +226,31 @@ struct MemoryView: View {
 /// Two lines, always: name + value, then context · reason. Hover swaps the value for "Stop" (the row keeps
 /// its height); Stop asks inside the row; a stop in progress shimmers its second line.
 /// "✓ wander stopped · 874 MB freed", floating over the bottom of the list for 3 s after a stop.
+/// An ⓘ that shows its text in a popover as soon as the pointer is on it (a `.help` tooltip takes
+/// a second and Romain did not see it).
+private struct InfoBubble: View {
+    let text: String
+    @State private var shown = false
+
+    var body: some View {
+        Image(systemName: "info.circle")
+            .font(.system(size: 11))
+            .foregroundStyle(shown ? Theme.text : Theme.tertiary)
+            .frame(width: 16, height: 16)
+            .contentShape(.rect)
+            .onHover { shown = $0 }
+            .popover(isPresented: $shown, arrowEdge: .bottom) {
+                Text(text)
+                    .font(.system(size: 12))
+                    .foregroundStyle(Theme.text)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(width: 240, alignment: .leading)
+                    .padding(12)
+            }
+            .accessibilityLabel(text)
+    }
+}
+
 private struct StopToastView: View {
     let toast: StopToast
     private let format = RunwayFormat()
