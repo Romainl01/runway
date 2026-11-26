@@ -1,0 +1,11 @@
+.build/
+build/
+.swiftpm/
+*.xcodeproj/
+.DS_Store
+
+# Private project memory and design explorations (kept locally, not published)
+runway.md
+design.md
+CLAUDE.md
+tools/
