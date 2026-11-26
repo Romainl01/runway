@@ -27,6 +27,7 @@ Runway = app macOS de barre de menus qui affiche la conso du forfait Claude (ses
 
 ## Barre de menus
 Texte mono « 18% » précédé d'une mini jauge horizontale 14×3 pt. Monochrome (template) sous 80 %, ambre ou rouge au-delà. En mode « Les deux » : « 18 · 73% ».
+Mémoire (section RAM) : toujours affichée après le forfait, « 14% · 26 Go » (Go en SF Mono, séparateur « · » atténué). Go en blanc (template) quand la pression mémoire est normale, ambre si moyenne, rouge si critique.
 
 ## Notifications (validées, ne pas changer le contenu)
 « Session à 50 % / 80 % / 95 % », « Semaine à 80 % », « Session rechargée », « Connexion Claude Code expirée ». Une seule par seuil et par fenêtre, son à 95 % uniquement. Icône d'app : carré noir, mini jauge blanche, rien d'autre.
