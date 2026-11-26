@@ -49,22 +49,6 @@
         }
       }
     },
-    "%@ · %@ in swap": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ · %@ in swap"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ · %@ en swap"
-          }
-        }
-      }
-    },
     "%@ · back at %@": {
       "localizations": {
         "en": {
@@ -945,6 +929,22 @@
         }
       }
     },
+    "Memory in use right now, out of %@. macOS keeps it nearly full on purpose. The pressure tells whether it is struggling.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory in use right now, out of %@. macOS keeps it nearly full on purpose. The pressure tells whether it is struggling."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La mémoire vive utilisée en ce moment, sur %@. macOS la garde presque pleine exprès. La pression dit s'il peine."
+          }
+        }
+      }
+    },
     "Memory · Claude answering": {
       "localizations": {
         "en": {
@@ -1393,6 +1393,22 @@
         }
       }
     },
+    "RAM": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RAM"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RAM"
+          }
+        }
+      }
+    },
     "Refresh": {
       "localizations": {
         "en": {
@@ -1681,6 +1697,22 @@
         }
       }
     },
+    "Swap (on disk)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap (on disk)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap (sur le disque)"
+          }
+        }
+      }
+    },
     "System": {
       "localizations": {
         "en": {
@@ -1917,6 +1949,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Semaine · %@"
+          }
+        }
+      }
+    },
+    "What no longer fits in RAM waits on the disk. The more there is, the slower the Mac gets when you go back to an app. The rows below count their share in RAM and on disk.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What no longer fits in RAM waits on the disk. The more there is, the slower the Mac gets when you go back to an app. The rows below count their share in RAM and on disk."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce qui ne tient plus en RAM attend sur le disque. Plus il y en a, plus le Mac ralentit quand tu reviens sur une app. Les lignes en dessous comptent leur part en RAM et sur le disque."
           }
         }
       }

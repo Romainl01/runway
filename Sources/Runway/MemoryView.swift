@@ -11,6 +11,14 @@ extension MemoryPressure {
         }
     }
 
+    @MainActor var color: Color {
+        switch self {
+        case .normal: Theme.green
+        case .warning: Theme.amber
+        case .critical: Theme.red
+        }
+    }
+
     var label: String {
         switch self {
         case .normal: tr("Normal pressure")
@@ -91,39 +99,57 @@ struct MemoryView: View {
 
     // MARK: Gauge
 
+    /// RAM, then swap: the rows count both, so the swap gauge is what makes them add up.
     private func gauge(_ snapshot: MemorySnapshot?) -> some View {
         let total = snapshot?.totalBytes ?? ProcessInfo.processInfo.physicalMemory
-        return VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .firstTextBaseline) {
-                Text("Memory")
-                    .font(.system(size: 12))
-                    .foregroundStyle(Theme.secondary)
-                Spacer()
-                HStack(spacing: 0) {
-                    Text(verbatim: snapshot.map { format.gigabytesNumber($0.usedBytes) } ?? "–")
-                        .foregroundStyle(Theme.text)
-                    Text(verbatim: " / " + format.totalGigabytes(total))
-                        .foregroundStyle(Theme.tertiary)
+        let totalText = format.totalGigabytes(total)
+        return VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 6) {
+                valueRow(label: tr("RAM"),
+                         value: snapshot.map { format.gigabytesNumber($0.usedBytes) } ?? "–",
+                         suffix: " / " + totalText)
+                Gauge(percent: (snapshot?.usedFraction ?? 0) * 100, muted: false, fill: snapshot?.pressure.fill)
+                Group {
+                    if let snapshot {
+                        Text(snapshot.pressure.label)
+                            .foregroundStyle(snapshot.pressure == .critical ? AnyShapeStyle(Theme.red) : Theme.tertiary)
+                    } else {
+                        Text("Scanning processes…").foregroundStyle(Theme.tertiary)
+                    }
                 }
-                .font(Theme.mono(13))
-                .lineLimit(1)
-                .fixedSize()
+                .font(.system(size: 11))
             }
-            Gauge(percent: (snapshot?.usedFraction ?? 0) * 100, muted: false, fill: snapshot?.pressure.fill)
-            Group {
-                if let snapshot {
-                    // A big swap is why the rows add up to more than the RAM: say it.
-                    Text(snapshot.swapUsedBytes >= 1 << 30
-                         ? tr("\(snapshot.pressure.label) · \(format.bytes(snapshot.swapUsedBytes)) in swap")
-                         : snapshot.pressure.label)
-                        .foregroundStyle(snapshot.pressure == .critical ? AnyShapeStyle(Theme.red) : Theme.tertiary)
-                } else {
-                    Text("Scanning processes…").foregroundStyle(Theme.tertiary)
+            .contentShape(.rect)
+            .help(tr("Memory in use right now, out of \(totalText). macOS keeps it nearly full on purpose. The pressure tells whether it is struggling."))
+            .accessibilityElement(children: .combine)
+
+            if let snapshot {
+                VStack(alignment: .leading, spacing: 6) {
+                    valueRow(label: tr("Swap (on disk)"), value: format.bytes(snapshot.swapUsedBytes), suffix: nil)
+                    Gauge(percent: min(Double(snapshot.swapUsedBytes) / Double(max(total, 1)), 1) * 100, muted: false,
+                          fill: AnyShapeStyle(snapshot.pressure.color.opacity(0.6)))
                 }
+                .contentShape(.rect)
+                .help(tr("What no longer fits in RAM waits on the disk. The more there is, the slower the Mac gets when you go back to an app. The rows below count their share in RAM and on disk."))
+                .accessibilityElement(children: .combine)
             }
-            .font(.system(size: 11))
         }
-        .accessibilityElement(children: .combine)
+    }
+
+    private func valueRow(label: String, value: String, suffix: String?) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(label)
+                .font(.system(size: 12))
+                .foregroundStyle(Theme.secondary)
+            Spacer()
+            HStack(spacing: 0) {
+                Text(verbatim: value).foregroundStyle(Theme.text)
+                if let suffix { Text(verbatim: suffix).foregroundStyle(Theme.tertiary) }
+            }
+            .font(Theme.mono(13))
+            .lineLimit(1)
+            .fixedSize()
+        }
     }
 
     // MARK: Groups

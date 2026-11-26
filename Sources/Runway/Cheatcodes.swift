@@ -177,12 +177,14 @@ enum MemoryScenario: String, CaseIterable, Identifiable {
         case .calm:
             snapshot.pressure = .normal
             snapshot.usedBytes = gib * 14 + gib / 5
+            snapshot.swapUsedBytes = gib / 4
             for g in snapshot.groups.indices {
                 for i in snapshot.groups[g].items.indices { snapshot.groups[g].items[i].reason = nil }
             }
         case .critical:
             snapshot.pressure = .critical
             snapshot.usedBytes = gib * 31 + gib * 2 / 5
+            snapshot.swapUsedBytes = gib * 14
             states["srv-my-app"] = .notResponding
         case .hover:
             cheats.memoryHoverID = "sim-iphone-16-pro"

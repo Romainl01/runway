@@ -11,7 +11,7 @@ enum FixtureMemory {
     /// A Mac at medium pressure, 26.1 of 32 GB used, with something to suggest in every group.
     static func snapshot(now: Date) -> MemorySnapshot {
         MemorySnapshot(
-            usedBytes: gb(26.1), totalBytes: 32 * gib, pressure: .warning,
+            usedBytes: gb(26.1), totalBytes: 32 * gib, pressure: .warning, swapUsedBytes: gb(6.4),
             groups: [
                 MemoryGroup(kind: .simulators, items: [
                     MemoryItem(id: "sim-iphone-16-pro", group: .simulators, name: "iPhone 16 Pro", context: "my-app",
