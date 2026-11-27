@@ -12,6 +12,12 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 REPO="Romainl01/runway"
 
+# Fail before the build and the notarization wait, not after.
+if gh release view "v$VERSION" --repo "$REPO" >/dev/null 2>&1; then
+    echo "release.sh: v$VERSION already exists on GitHub; pick another version." >&2
+    exit 1
+fi
+
 swift test
 # Sparkle compares CFBundleVersion: the commit count only goes up.
 BUILD_NUMBER="$(git rev-list --count HEAD)"
