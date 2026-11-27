@@ -340,8 +340,8 @@ struct MonoToggleStyle: ToggleStyle {
 
 /// Small bordered button (22 pt, radius 6): "Stop", "Cancel", "Force stop". `solid` is the confirming one;
 /// `destructive` is every stop ("Stop", its confirmation, "Force stop"): red text and outline, never filled;
-/// `fill` stretches it to the row's width at `Theme.fieldHeight` and row font size ("Check for Updates…"),
-/// to match the segmented control it sits under.
+/// `fill` stretches it to the row's width at `Theme.fieldHeight`, row font size and `surface` fill
+/// ("Check for Updates…"), to match the segmented control it sits under.
 struct SmallButtonStyle: ButtonStyle {
     var solid = false
     var destructive = false
@@ -383,6 +383,7 @@ struct SmallButtonStyle: ButtonStyle {
         private var background: AnyShapeStyle {
             if destructive { return hovering ? AnyShapeStyle(Theme.red.opacity(0.12)) : Theme.clear }
             if solid { return Theme.text }
+            if fill { return hovering ? Theme.track : Theme.surface }
             return hovering ? Theme.surface : Theme.clear
         }
 

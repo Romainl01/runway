@@ -17,9 +17,11 @@ final class Updater {
     }
 
     /// `enabled` is false in QA runs (fixture, preview window) and outside a bundle with a feed.
+    /// QA runs still draw the button as enabled, like the shipped app, and clicking it does nothing.
     init(enabled: Bool) {
         guard enabled, Bundle.main.object(forInfoDictionaryKey: "SUFeedURL") != nil else {
             controller = nil
+            canCheckForUpdates = !enabled
             return
         }
         let controller = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
