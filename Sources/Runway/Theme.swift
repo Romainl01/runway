@@ -237,18 +237,21 @@ struct MonoToggleStyle: ToggleStyle {
 }
 
 /// Small bordered button (22 pt, radius 6): "Stop", "Cancel", "Force stop". `solid` is the confirming one;
+/// `destructive` is every stop ("Stop", its confirmation, "Force stop"): red text and outline, never filled;
 /// `fill` stretches it to the row's width ("Check for Updates…").
 struct SmallButtonStyle: ButtonStyle {
     var solid = false
+    var destructive = false
     var fill = false
 
     func makeBody(configuration: Configuration) -> some View {
-        SmallButtonBody(configuration: configuration, solid: solid, fill: fill)
+        SmallButtonBody(configuration: configuration, solid: solid, destructive: destructive, fill: fill)
     }
 
     private struct SmallButtonBody: View {
         let configuration: Configuration
         let solid: Bool
+        let destructive: Bool
         let fill: Bool
         @State private var hovering = false
         @Environment(\.isEnabled) private var isEnabled
@@ -257,16 +260,32 @@ struct SmallButtonStyle: ButtonStyle {
             configuration.label
                 .font(.system(size: 11, weight: .medium))
                 .lineLimit(1)
-                .foregroundStyle(solid ? Theme.background : Theme.text)
+                .foregroundStyle(foreground)
                 .padding(.horizontal, 8)
                 .frame(maxWidth: fill ? .infinity : nil)
                 .frame(height: 22)
-                .background(solid ? Theme.text : (hovering ? Theme.surface : Theme.clear), in: .rect(cornerRadius: Theme.controlRadius))
-                .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).strokeBorder(solid ? Theme.text : Theme.border, lineWidth: 1))
+                .background(background, in: .rect(cornerRadius: Theme.controlRadius))
+                .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).strokeBorder(stroke, lineWidth: 1))
                 .opacity(configuration.isPressed ? 0.7 : (isEnabled ? 1 : 0.5))
                 .contentShape(.rect)
                 .onHover { hovering = $0 && isEnabled }
                 .fixedSize(horizontal: !fill, vertical: true)
+        }
+
+        private var foreground: AnyShapeStyle {
+            if destructive { return AnyShapeStyle(Theme.red) }
+            return solid ? Theme.background : Theme.text
+        }
+
+        private var background: AnyShapeStyle {
+            if destructive { return hovering ? AnyShapeStyle(Theme.red.opacity(0.12)) : Theme.clear }
+            if solid { return Theme.text }
+            return hovering ? Theme.surface : Theme.clear
+        }
+
+        private var stroke: AnyShapeStyle {
+            if destructive { return AnyShapeStyle(Theme.red.opacity(0.6)) }
+            return solid ? Theme.text : Theme.border
         }
     }
 }

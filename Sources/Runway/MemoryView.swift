@@ -223,7 +223,7 @@ struct MemoryView: View {
 
 // MARK: - Row
 
-/// Two lines, always: name + value, then context · reason. Hover swaps the value for "Stop" (the row keeps
+/// Name + value, then context · reason (a second line of it if too long). Hover swaps the value for "Stop" (the row keeps
 /// its height); Stop asks inside the row; a stop in progress shimmers its second line.
 /// "✓ wander stopped · 874 MB freed", floating over the bottom of the list for 3 s after a stop.
 /// An ⓘ that shows its text in a popover as soon as the pointer is on it (a `.help` tooltip takes
@@ -328,7 +328,7 @@ private struct MemoryRow: View {
             }
             .frame(height: 16)
             detailLine
-                .frame(height: 14)
+                .frame(minHeight: 14)
             if isConfirming { confirmation }
         }
         .padding(.horizontal, 8)
@@ -337,11 +337,11 @@ private struct MemoryRow: View {
         .overlay(alignment: .trailing) {
             if showsStop {
                 Button("Stop", action: onAskStop)
-                    .buttonStyle(SmallButtonStyle())
+                    .buttonStyle(SmallButtonStyle(destructive: true))
                     .padding(.trailing, 8)
             } else if isNotResponding {
                 Button("Force stop", action: onForceStop)
-                    .buttonStyle(SmallButtonStyle())
+                    .buttonStyle(SmallButtonStyle(destructive: true))
                     .padding(.trailing, 8)
             }
         }
@@ -377,16 +377,18 @@ private struct MemoryRow: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         case .notResponding, nil:
             let hasReason = item.reason != nil
-            HStack(spacing: 6) {
+            // A long reason wraps to a second line instead of being cut; the dot stays on the first one.
+            HStack(alignment: .top, spacing: 6) {
                 if isNotResponding {
-                    Circle().fill(Theme.red).frame(width: 6, height: 6)
+                    Circle().fill(Theme.red).frame(width: 6, height: 6).padding(.top, 4)
                 } else if hasReason {
-                    Circle().fill(Theme.amber).frame(width: 6, height: 6)
+                    Circle().fill(Theme.amber).frame(width: 6, height: 6).padding(.top, 4)
                 }
                 detailText
                     .font(.system(size: 11))
-                    .lineLimit(1)
+                    .lineLimit(2)
                     .truncationMode(.tail)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -437,7 +439,7 @@ private struct MemoryRow: View {
             HStack(spacing: 6) {
                 Spacer(minLength: 0)
                 Button("Cancel", action: onCancel).buttonStyle(SmallButtonStyle())
-                Button(busy ? "Stop anyway" : "Stop", action: onConfirm).buttonStyle(SmallButtonStyle(solid: true))
+                Button(busy ? "Stop anyway" : "Stop", action: onConfirm).buttonStyle(SmallButtonStyle(destructive: true))
             }
             .padding(.top, 4)
         }
