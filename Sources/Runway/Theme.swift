@@ -30,7 +30,11 @@ enum Theme {
         static let secondary = dynamic(dark: 0xA1A1A1, light: 0x666666)
         static let tertiary = dynamic(dark: 0x8A8A8A, light: 0x767676)
         static let track = dynamic(dark: 0x262626, light: 0xEAEAEA)
+        static let knob = dynamic(dark: 0xEDEDED, light: 0xFFFFFF)
     }
+
+    /// Switch knob when off: light on both appearances, like a native switch. Glass keeps `.primary`.
+    static var knob: AnyShapeStyle { glass ? AnyShapeStyle(.primary) : AnyShapeStyle(solid.knob) }
 
     static let green = Color(nsColor: .runwayGreen)
     static let amber = Color(nsColor: .runwayAmber)
@@ -47,6 +51,9 @@ enum Theme {
     static let rowRadius: CGFloat = 8
     static let rowInset = EdgeInsets(top: 8, leading: 10, bottom: 8, trailing: 10)
     static let hairline: CGFloat = 1
+    /// Height of a control that spans its section (segmented control, "Check for Updates…"), so two of them
+    /// stacked in Settings read as one family. Inline buttons ("Stop") stay at 22.
+    static let fieldHeight: CGFloat = 28
 
     /// Two text roles in a settings group, kept apart by colour and weight, not just size: the header
     /// names the group (11 pt medium, tertiary), the rows are what you act on (12 pt, text).
@@ -302,7 +309,8 @@ struct HoverUnderline: ViewModifier {
     }
 }
 
-/// Monochrome switch: on = text colour track with background knob.
+/// Monochrome switch, macOS "small" size (32 × 18). Off: light knob on the track; on: the track fills with
+/// the text colour and the knob takes the background, so the knob always contrasts with what is under it.
 struct MonoToggleStyle: ToggleStyle {
     func makeBody(configuration: Configuration) -> some View {
         Button {
@@ -316,10 +324,11 @@ struct MonoToggleStyle: ToggleStyle {
                 ZStack(alignment: configuration.isOn ? .trailing : .leading) {
                     Capsule().fill(configuration.isOn ? Theme.text : Theme.track)
                     Circle()
-                        .fill(configuration.isOn ? Theme.background : Theme.secondary)
+                        .fill(configuration.isOn ? Theme.background : Theme.knob)
+                        .shadow(color: .black.opacity(0.2), radius: 1, y: 0.5)
                         .padding(2)
                 }
-                .frame(width: 26, height: 15)
+                .frame(width: 32, height: 18)
                 .animation(Theme.transition, value: configuration.isOn)
             }
             .contentShape(.rect)
@@ -331,7 +340,8 @@ struct MonoToggleStyle: ToggleStyle {
 
 /// Small bordered button (22 pt, radius 6): "Stop", "Cancel", "Force stop". `solid` is the confirming one;
 /// `destructive` is every stop ("Stop", its confirmation, "Force stop"): red text and outline, never filled;
-/// `fill` stretches it to the row's width ("Check for Updates…").
+/// `fill` stretches it to the row's width at `Theme.fieldHeight` and row font size ("Check for Updates…"),
+/// to match the segmented control it sits under.
 struct SmallButtonStyle: ButtonStyle {
     var solid = false
     var destructive = false
@@ -351,12 +361,12 @@ struct SmallButtonStyle: ButtonStyle {
 
         var body: some View {
             configuration.label
-                .font(.system(size: 11, weight: .medium))
+                .font(.system(size: fill ? 12 : 11, weight: .medium))
                 .lineLimit(1)
                 .foregroundStyle(foreground)
                 .padding(.horizontal, 8)
                 .frame(maxWidth: fill ? .infinity : nil)
-                .frame(height: 22)
+                .frame(height: fill ? Theme.fieldHeight : 22)
                 .background(background, in: .rect(cornerRadius: Theme.controlRadius))
                 .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).strokeBorder(stroke, lineWidth: 1))
                 .opacity(configuration.isPressed ? 0.7 : (isEnabled ? 1 : 0.5))

@@ -114,7 +114,7 @@ struct SegmentedControl: View {
                     Text(mode.label)
                         .font(.system(size: 12, weight: isOn ? .medium : .regular))
                         .foregroundStyle(isOn ? Theme.text : Theme.secondary)
-                        .frame(maxWidth: .infinity, minHeight: 24)
+                        .frame(maxWidth: .infinity, minHeight: Theme.fieldHeight - 4)
                         .background(isOn ? Theme.track : Theme.clear, in: .rect(cornerRadius: Theme.pillRadius))
                         .contentShape(.rect)
                 }
