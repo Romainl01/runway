@@ -22,11 +22,15 @@ See how much of your 5-hour session and weekly limit is left, at a glance, and g
 
 ## Install
 
+[Download Runway.dmg](https://github.com/Romainl01/runway/releases/latest/download/Runway.dmg) (signed and notarized), open it and drag Runway to Applications. Updates then arrive on their own.
+
+Or from the terminal:
+
 ```sh
 curl -fsSL https://raw.githubusercontent.com/Romainl01/runway/main/install.sh | bash
 ```
 
-This downloads the latest release, puts `Runway.app` in `/Applications` (or `~/Applications`) and starts it. Run the same command again to update. You can also grab `Runway.zip` from [Releases](https://github.com/Romainl01/runway/releases/latest) yourself.
+This downloads the latest release, puts `Runway.app` in `/Applications` (or `~/Applications`) and starts it. Runway checks for updates by itself (Sparkle), and Settings has a Check for Updates button.
 
 ## Features
 
