@@ -175,7 +175,8 @@
 
   /* Memory rows: a stopped row slides out blurred, then its height folds (grid rows) */
   .coll { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 250ms var(--ease-drawer), opacity 200ms ease; }
-  .coll > div { min-height: 0; overflow: hidden; }
+  /* overflow clips at the padding edge: 10px of padding leaves room for the rows' -10px highlight bleed */
+  .coll > div { min-height: 0; overflow: hidden; margin: 0 -10px; padding: 0 10px; }
   .coll.gone { grid-template-rows: 0fr; opacity: 0; }
   .grp { padding-bottom: 12px; }
   .grp-h { margin-bottom: 2px; font-size: 11px; font-weight: 500; color: var(--tertiary); }
