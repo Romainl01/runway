@@ -107,6 +107,7 @@ RUNWAY_FIXTURE=Tests/Fixtures/usage-sample.json RUNWAY_NOW=2026-11-26T13:47:00Z 
 - `RUNWAY_SCREEN=settings`: opens on the settings screen.
 - `RUNWAY_OPEN_MENU=1`: opens the real menu bar panel after launch.
 - `RUNWAY_DUMP_MENUBAR=<dir>`: exports sample menu bar labels as PNG.
+- `RUNWAY_SNAPSHOT=<png>` (with `--preview-window`): writes the preview window's content as a PNG, then quits. No screen recording permission needed.
 - `RUNWAY_DEBUG=1`: logs HTTP statuses to stderr (never the token).
 - Append `-AppleLanguages '(fr)'` to see the French UI.
 

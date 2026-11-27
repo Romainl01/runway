@@ -9,6 +9,7 @@ struct SettingsView: View {
     @AppStorage(PrefKey.menuBarMode) private var menuBarMode = MenuBarMode.session.rawValue
     @AppStorage(PrefKey.notifySessionReset) private var notifySessionReset = true
     @State private var launchAtLogin = LaunchAtLogin.isEnabled
+    @Environment(Updater.self) private var updater
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -26,32 +27,33 @@ struct SettingsView: View {
             Hairline()
 
             VStack(alignment: .leading, spacing: 20) {
-                section("Notifications") {
+                section(Text("Notifications")) {
                     ThresholdRow(title: tr("Session"), csv: $sessionCSV)
                     ThresholdRow(title: tr("Weekly"), csv: $weeklyCSV)
+                    Toggle("Notify when the session resets", isOn: $notifySessionReset)
                 }
-                section("Menu bar") {
+                section(Text("Menu bar")) {
                     SegmentedControl(selection: $menuBarMode)
                 }
-                VStack(alignment: .leading, spacing: 12) {
-                    Toggle("Notify when the session resets", isOn: $notifySessionReset)
+                section(Text(verbatim: ["Runway", Updater.version].compactMap { $0 }.joined(separator: " "))) {
                     Toggle("Open at login", isOn: $launchAtLogin)
                         .onChange(of: launchAtLogin) { _, newValue in
                             if !LaunchAtLogin.set(newValue) { launchAtLogin = LaunchAtLogin.isEnabled }
                         }
+                    Button("Check for Updates…", action: updater.checkForUpdates)
+                        .buttonStyle(SmallButtonStyle(fill: true))
+                        .disabled(!updater.canCheckForUpdates)
                 }
-                .toggleStyle(MonoToggleStyle())
             }
+            .toggleStyle(MonoToggleStyle())
             .padding(Theme.padding)
         }
         .onAppear { launchAtLogin = LaunchAtLogin.isEnabled }
     }
 
-    private func section<Content: View>(_ title: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {
+    private func section<Content: View>(_ title: Text, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(title)
-                .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(Theme.tertiary)
+            SectionHeader(title: title)
             content()
         }
     }
@@ -66,8 +68,8 @@ struct ThresholdRow: View {
         let selected = Set(NotifierSettings.parseThresholds(csv))
         HStack {
             Text(title)
-                .font(.system(size: 12))
-                .foregroundStyle(Theme.secondary)
+                .font(Theme.rowFont)
+                .foregroundStyle(Theme.text)
             Spacer()
             HStack(spacing: 6) {
                 ForEach(NotifierSettings.defaultThresholds, id: \.self) { t in

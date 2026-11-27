@@ -17,6 +17,9 @@ BIN="$(swift build -c release --arch arm64 --arch x86_64 --show-bin-path)/Runway
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/Runway"
+# Sparkle (updates): the binary's rpath points at Contents/Frameworks.
+mkdir -p "$APP/Contents/Frameworks"
+ditto "$(dirname "$BIN")/Sparkle.framework" "$APP/Contents/Frameworks/Sparkle.framework"
 
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -37,6 +40,9 @@ cat > "$APP/Contents/Info.plist" <<PLIST
     <key>LSMinimumSystemVersion</key><string>26.0</string>
     <key>LSUIElement</key><true/>
     <key>LSApplicationCategoryType</key><string>public.app-category.developer-tools</string>
+    <key>SUFeedURL</key><string>https://github.com/Romainl01/runway/releases/latest/download/appcast.xml</string>
+    <key>SUPublicEDKey</key><string>c13CU4cXw1rDc3VtxQx70ste+8i590ntjGKq5UqmU3M=</string>
+    <key>SUEnableAutomaticChecks</key><true/>
     <key>NSHumanReadableCopyright</key><string>© 2026 Romain Lagrange</string>
 </dict>
 </plist>
@@ -57,6 +63,16 @@ done
 iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/AppIcon.icns"
 rm -rf "$ICONSET" "$ROOT/build/icon_1024.png"
 
-codesign --force --options runtime --sign "$IDENTITY" "$APP"
+# Inside out: Sparkle's helpers, then the framework, then the app. Hardened runtime and a timestamp only
+# with a real identity: ad-hoc code has no team ID, so library validation would refuse Sparkle.
+TS=(); [[ "$IDENTITY" == "-" ]] || TS=(--options runtime --timestamp)
+SPARKLE="$APP/Contents/Frameworks/Sparkle.framework/Versions/B"
+for item in "$SPARKLE/XPCServices/Installer.xpc" "$SPARKLE/Autoupdate" "$SPARKLE/Updater.app"; do
+    if [[ -e "$item" ]]; then codesign --force ${TS[@]+"${TS[@]}"} --sign "$IDENTITY" "$item"; fi
+done
+# The downloader keeps its own entitlements (Sparkle's documented signing order).
+codesign --force ${TS[@]+"${TS[@]}"} --preserve-metadata=entitlements --sign "$IDENTITY" "$SPARKLE/XPCServices/Downloader.xpc"
+codesign --force ${TS[@]+"${TS[@]}"} --sign "$IDENTITY" "$APP/Contents/Frameworks/Sparkle.framework"
+codesign --force ${TS[@]+"${TS[@]}"} --sign "$IDENTITY" "$APP"
 codesign --verify --deep --strict "$APP"
 echo "OK: $APP"

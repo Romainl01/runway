@@ -9,6 +9,7 @@ struct RunwayApp: App {
     var body: some Scene {
         MenuBarExtra {
             PopoverView(store: appDelegate.store, ram: appDelegate.ram)
+                .environment(appDelegate.updater)
         } label: {
             MenuBarLabel(store: appDelegate.store, ram: appDelegate.ram)
         }
@@ -20,6 +21,7 @@ struct RunwayApp: App {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let store: UsageStore
     let ram: RAMStore
+    let updater: Updater
     private let sink = UserNotificationSink()
     private let isPreview = CommandLine.arguments.contains("--preview-window")
     private let isFixture: Bool
@@ -85,6 +87,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             stopper = ProcessStopper()
         }
         ram = RAMStore(scanner: scanner, stopper: stopper, now: now)
+        updater = Updater(enabled: !isFixture && !CommandLine.arguments.contains("--preview-window"))
         super.init()
     }
 
@@ -149,7 +152,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// `--preview-window`: the popover content in a regular window, for screenshot QA.
     private func openPreviewWindow() {
         // Same system glass panel as the MenuBarExtra window, so the preview shows the real shape and border.
-        let hosting = NSHostingView(rootView: PopoverView(store: store, ram: ram))
+        let hosting = NSHostingView(rootView: PopoverView(store: store, ram: ram).environment(updater))
         let glass = NSGlassEffectView()
         glass.cornerRadius = Theme.popoverRadius
         glass.contentView = hosting
@@ -174,6 +177,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.regular)
         window.makeKeyAndOrderFront(nil)
         NSApp.activate()
+
+        // QA: RUNWAY_SNAPSHOT=<png> writes the preview's content at 2x, without screen recording permission.
+        if let path = ProcessInfo.processInfo.environment["RUNWAY_SNAPSHOT"] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                guard let rep = hosting.bitmapImageRepForCachingDisplay(in: hosting.bounds) else { return }
+                hosting.cacheDisplay(in: hosting.bounds, to: rep)
+                try? rep.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: path))
+                NSApp.terminate(nil)
+            }
+        }
     }
 }
 

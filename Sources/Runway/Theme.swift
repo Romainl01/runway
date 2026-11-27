@@ -44,6 +44,11 @@ enum Theme {
     static let pillRadius: CGFloat = 4
     static let hairline: CGFloat = 1
 
+    /// Two text roles in a settings group, kept apart by colour and weight, not just size: the header
+    /// names the group (11 pt medium, tertiary), the rows are what you act on (12 pt, text).
+    static let sectionHeaderFont = Font.system(size: 11, weight: .medium)
+    static let rowFont = Font.system(size: 12)
+
     /// The only motion besides the refresh icon: 150 ms ease-out.
     static let transition = Animation.easeOut(duration: 0.15)
 
@@ -162,6 +167,18 @@ struct IconButton: View {
     }
 }
 
+/// Names a group of rows ("Notifications", "Runway 0.1.0"). Rows under it use `Theme.rowFont` in `Theme.text`.
+struct SectionHeader: View {
+    var title: Text
+
+    var body: some View {
+        title
+            .font(Theme.sectionHeaderFont)
+            .foregroundStyle(Theme.tertiary)
+            .accessibilityAddTraits(.isHeader)
+    }
+}
+
 /// Bordered pill (radius 4).
 struct Pill: View {
     var text: String
@@ -200,7 +217,7 @@ struct MonoToggleStyle: ToggleStyle {
         } label: {
             HStack(alignment: .center, spacing: 10) {
                 configuration.label
-                    .font(.system(size: 12))
+                    .font(Theme.rowFont)
                     .foregroundStyle(Theme.text)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 ZStack(alignment: configuration.isOn ? .trailing : .leading) {
@@ -219,18 +236,22 @@ struct MonoToggleStyle: ToggleStyle {
     }
 }
 
-/// Small bordered button (22 pt, radius 6): "Stop", "Cancel", "Force stop". `solid` is the confirming one.
+/// Small bordered button (22 pt, radius 6): "Stop", "Cancel", "Force stop". `solid` is the confirming one;
+/// `fill` stretches it to the row's width ("Check for Updates…").
 struct SmallButtonStyle: ButtonStyle {
     var solid = false
+    var fill = false
 
     func makeBody(configuration: Configuration) -> some View {
-        SmallButtonBody(configuration: configuration, solid: solid)
+        SmallButtonBody(configuration: configuration, solid: solid, fill: fill)
     }
 
     private struct SmallButtonBody: View {
         let configuration: Configuration
         let solid: Bool
+        let fill: Bool
         @State private var hovering = false
+        @Environment(\.isEnabled) private var isEnabled
 
         var body: some View {
             configuration.label
@@ -238,13 +259,14 @@ struct SmallButtonStyle: ButtonStyle {
                 .lineLimit(1)
                 .foregroundStyle(solid ? Theme.background : Theme.text)
                 .padding(.horizontal, 8)
+                .frame(maxWidth: fill ? .infinity : nil)
                 .frame(height: 22)
                 .background(solid ? Theme.text : (hovering ? Theme.surface : Theme.clear), in: .rect(cornerRadius: Theme.controlRadius))
                 .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).strokeBorder(solid ? Theme.text : Theme.border, lineWidth: 1))
-                .opacity(configuration.isPressed ? 0.7 : 1)
+                .opacity(configuration.isPressed ? 0.7 : (isEnabled ? 1 : 0.5))
                 .contentShape(.rect)
-                .onHover { hovering = $0 }
-                .fixedSize()
+                .onHover { hovering = $0 && isEnabled }
+                .fixedSize(horizontal: !fill, vertical: true)
         }
     }
 }

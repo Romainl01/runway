@@ -273,9 +273,13 @@ private struct StopToastView: View {
         .font(.system(size: 12))
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
-        .background(Theme.surface, in: .rect(cornerRadius: Theme.controlRadius))
-        .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).strokeBorder(Theme.border, lineWidth: 1))
-        .shadow(color: .black.opacity(0.35), radius: 8, y: 4)
+        // Green tint over an opaque base: a surface-coloured card read as one more row.
+        .background {
+            RoundedRectangle(cornerRadius: Theme.controlRadius).fill(Theme.background)
+            RoundedRectangle(cornerRadius: Theme.controlRadius).fill(Theme.green.opacity(0.14))
+        }
+        .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).strokeBorder(Theme.green.opacity(0.45), lineWidth: 1))
+        .shadow(color: .black.opacity(0.5), radius: 12, y: 4)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isStaticText)
     }
