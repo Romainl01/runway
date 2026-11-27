@@ -42,6 +42,10 @@ enum Theme {
     static let popoverRadius: CGFloat = 12
     static let controlRadius: CGFloat = 6
     static let pillRadius: CGFloat = 4
+    /// A highlighted list row (memory rows on hover): rounder and roomier than a control, so the highlight
+    /// does not hug the text. Inset 10 × 8 inside it, pulled out by the same 10 so the text stays aligned.
+    static let rowRadius: CGFloat = 8
+    static let rowInset = EdgeInsets(top: 8, leading: 10, bottom: 8, trailing: 10)
     static let hairline: CGFloat = 1
 
     /// Two text roles in a settings group, kept apart by colour and weight, not just size: the header

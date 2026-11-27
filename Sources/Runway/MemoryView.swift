@@ -331,21 +331,20 @@ private struct MemoryRow: View {
                 .frame(minHeight: 14)
             if isConfirming { confirmation }
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 6)
-        .background(highlighted ? Theme.surface : Theme.clear, in: .rect(cornerRadius: Theme.controlRadius))
+        .padding(Theme.rowInset)
+        .background(highlighted ? Theme.surface : Theme.clear, in: .rect(cornerRadius: Theme.rowRadius))
         .overlay(alignment: .trailing) {
             if showsStop {
                 Button("Stop", action: onAskStop)
                     .buttonStyle(SmallButtonStyle(destructive: true))
-                    .padding(.trailing, 8)
+                    .padding(.trailing, Theme.rowInset.trailing)
             } else if isNotResponding {
                 Button("Force stop", action: onForceStop)
                     .buttonStyle(SmallButtonStyle(destructive: true))
-                    .padding(.trailing, 8)
+                    .padding(.trailing, Theme.rowInset.trailing)
             }
         }
-        .padding(.horizontal, -8)
+        .padding(.horizontal, -Theme.rowInset.leading)
         .contentShape(.rect)
         .onHover { hovering = $0 }
         .accessibilityElement(children: .contain)

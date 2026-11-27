@@ -8,7 +8,7 @@
 <meta name="color-scheme" content="dark light">
 <link rel="icon" href="images/icon.png">
 <meta property="og:title" content="Runway">
-<meta property="og:description" content="Claude limits and RAM, at a glance.">
+<meta property="og:description" content="Know your limits. Claude usage and RAM in your menu bar.">
 <meta property="og:image" content="images/hero-dark.png">
 <script>document.documentElement.classList.add("js")</script>
 <style>
@@ -75,8 +75,6 @@
     padding: 24px 0 32px; font-size: 13px; color: var(--tertiary);
   }
   footer .rule { flex: 1; min-width: 24px; height: 1px; background: var(--border); }
-  footer a, footer button { color: inherit; text-decoration: none; background: none; border: 0; padding: 0; font: inherit; cursor: pointer; }
-  footer a:hover, footer button:hover { color: var(--text); }
 
   /* Entrance, once: opacity + 12 px rise + blur, staggered */
   .js .rv { opacity: 0; transform: translateY(12px); filter: blur(8px); transition: opacity 600ms var(--ease-out), transform 600ms var(--ease-out), filter 600ms var(--ease-out); }
@@ -155,7 +153,7 @@
   .sep { height: 1px; background: var(--border); }
   .pbody { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
   .grow {
-    display: block; width: calc(100% + 16px); margin: -8px; padding: 8px; border: 0; border-radius: 8px;
+    display: block; width: calc(100% + 20px); margin: -10px; padding: 10px; border: 0; border-radius: 8px;
     background: none; color: inherit; font: inherit; text-align: left; cursor: pointer;
     transition: background-color 150ms ease;
   }
@@ -171,8 +169,8 @@
   .g-meta { display: block; font-size: 11px; color: var(--tertiary); }
   .cap { font-size: 11px; line-height: 16px; padding: 0 5px; border: 1px solid var(--red); border-radius: 4px; color: var(--red); }
   .pfoot { display: flex; align-items: center; padding: 12px 16px; font-size: 12px; color: var(--secondary); }
-  .pfoot a, .lnk { color: inherit; text-decoration: none; background: none; border: 0; padding: 0; font: inherit; cursor: pointer; }
-  .pfoot a:hover, .lnk:hover { text-decoration: underline; }
+  .pfoot a, .lnk, .lnk-l { color: inherit; text-decoration: none; background: none; border: 0; padding: 0; font: inherit; cursor: pointer; }
+  .pfoot a:hover, .lnk:hover, .lnk-l:hover { text-decoration: underline; }
   .lnk { margin-left: auto; }
 
   /* Memory rows: a stopped row slides out blurred, then its height folds (grid rows) */
@@ -182,7 +180,7 @@
   .grp { padding-bottom: 12px; }
   .grp-h { margin-bottom: 2px; font-size: 11px; font-weight: 500; color: var(--tertiary); }
   .mrow {
-    position: relative; margin: 0 -8px; padding: 6px 8px; border-radius: 6px;
+    position: relative; margin: 0 -10px; padding: 8px 10px; border-radius: 8px;
     transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out), filter 200ms var(--ease-out), background-color 150ms ease;
   }
   .mrow.leaving { opacity: 0; transform: translateX(32px); filter: blur(4px); }
@@ -207,7 +205,8 @@
   }
   @media (hover: none) { .stop { opacity: 1; pointer-events: auto; } .mv { opacity: 0; } }
   .mrow.stopping .stop, .mrow.stopping .mv { opacity: 0; pointer-events: none; }
-  .m2 { margin-top: 2px; padding-left: 14px; font-size: 11px; color: var(--tertiary); }
+  .m2 { margin-top: 2px; display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 11px; color: var(--tertiary); }
+  .m2 > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .m2 .why { color: var(--secondary); }
   .shim {
     background: linear-gradient(90deg, var(--tertiary) 0%, var(--text) 50%, var(--tertiary) 100%);
@@ -328,6 +327,7 @@
           <div class="sep"></div>
           <div class="pfoot">
             <a href="https://claude.ai/settings/usage" target="_blank" rel="noopener noreferrer" id="details" data-i18n="details">Details on claude.ai ↗</a>
+            <button type="button" class="lnk-l" id="activity" data-i18n="activity" hidden>Activity Monitor ↗</button>
             <button type="button" class="lnk" data-i18n="quit">Quit</button>
           </div>
         </div>
@@ -337,7 +337,7 @@
 
     <div>
       <div class="brand rv"><img src="images/icon.png" alt="">Runway</div>
-      <h1 class="rv" style="transition-delay: 80ms" data-i18n="title">Claude limits and RAM, at a glance.</h1>
+      <h1 class="rv" style="transition-delay: 80ms" data-i18n="title">Know your limits.</h1>
       <p class="lede rv" style="transition-delay: 160ms" data-i18n="lede">Runway keeps your Claude session and weekly limit in the menu bar, and spots the simulators, dev servers and idle Claude Code sessions eating your memory.</p>
       <div class="btns rv" style="transition-delay: 240ms">
         <div class="bwrap">
@@ -359,11 +359,9 @@
   </main>
 
   <footer class="rv" style="transition-delay: 400ms">
-    <span data-i18n="disclaimer">MIT license. Not affiliated with Anthropic.</span>
+    <span>Romain Lagrange</span>
     <span class="rule"></span>
-    <button type="button" id="copy" title="curl -fsSL https://raw.githubusercontent.com/Romainl01/runway/main/install.sh | bash" data-i18n="terminal">Install from the terminal</button>
-    <button type="button" id="replay" data-i18n="replay">Replay intro</button>
-    <a href="https://github.com/Romainl01/runway/releases" data-i18n="releases">Releases</a>
+    <span>© 2026</span>
   </footer>
 </div>
 
@@ -381,22 +379,18 @@
   // English is the source; French follows the browser, like the app follows the Mac.
   // Strings inside the popover are the app's own (Resources/Localizable.xcstrings).
   const STATIC_FR = {
-    title: "Limites Claude et RAM, d’un coup d’œil.",
+    title: "Connaissez vos limites.",
     lede: "Runway garde votre session et votre limite hebdo Claude dans la barre de menus, et repère les simulateurs, serveurs de dev et sessions Claude Code inactives qui mangent votre mémoire.",
     download: "Télécharger pour Mac",
     downloadMeta: "Gratuit · macOS 26 ou plus récent",
     github: "Voir sur GitHub",
     githubMeta: "Open source · licence MIT",
     hint: "Cliquez sur Session, ou arrêtez quelque chose dans Mémoire.",
-    disclaimer: "Licence MIT. Non affilié à Anthropic.",
-    terminal: "Installer depuis le terminal",
-    replay: "Revoir l’intro",
-    releases: "Versions",
     refresh: "Rafraîchir", settings: "Réglages", quitRunway: "Quitter Runway", quit: "Quitter",
     updated: "Mis à jour il y a 8" + sp + "s",
     plan: "Forfait", memory: "Mémoire", session: "Session", cap: "Plafond atteint",
     weekly: "Semaine", weeklyFable: "Semaine · Fable", weeklyReset: "Reset lun. 30 nov. 14:00",
-    swap: "Swap (sur le disque)", empty: "Plus rien à arrêter.", details: "Détail sur claude.ai ↗",
+    activity: "Moniteur d’activité ↗", swap: "Swap (sur le disque)", empty: "Plus rien à arrêter.", details: "Détail sur claude.ai ↗",
   };
 
   const EN = {
@@ -419,7 +413,7 @@
     ],
     tokens: ["18%", "73%", "94%", "100%", "41%", "87%", "97%", "resets 3:30 PM", "in 1h 30m", "~26% at reset", "in 4d 2h",
       "26.1 GB", "6.4 GB", ":8081 expo start", ":3000 next dev", "iPhone 16 Pro", "idle for 2 h", "orphan", "no message for 5 h"],
-    copied: "Command copied", stars: (n) => "★ " + n.toLocaleString("en") + " stars · Open source",
+    stars: (n) => "★ " + n.toLocaleString("en") + " stars · Open source",
   };
   const FR = {
     pct: (v) => v + sp + "%",
@@ -441,7 +435,7 @@
     ],
     tokens: ["18 %", "73 %", "94 %", "100 %", "41 %", "87 %", "97 %", "reset 15:30", "dans 1 h 30", "~26 % au reset", "dans 4 j 2 h",
       "26,1 Go", "6,4 Go", ":8081 expo start", ":3000 next dev", "iPhone 16 Pro", "inactif depuis 2 h", "orphelin", "aucun message depuis 5 h"],
-    copied: "Commande copiée", stars: (n) => "★ " + n.toLocaleString("fr") + " étoiles · Open source",
+    stars: (n) => "★ " + n.toLocaleString("fr") + " étoiles · Open source",
   };
   const L = fr ? FR : EN;
 
@@ -529,6 +523,7 @@
     $("body-mem").hidden = !mem;
     $("plan-pill").hidden = mem;
     $("details").hidden = mem;
+    $("activity").hidden = !mem;
   }
   $("tab-plan").addEventListener("click", () => selectTab(false));
   $("tab-mem").addEventListener("click", () => selectTab(true));
@@ -538,8 +533,9 @@
   const groups = [];
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; };
   function detail(it) {
-    const m2 = el("div", "m2", it.ctx + (it.ctx && it.why ? " · " : ""));
-    if (it.why) m2.append(el("span", "why", it.why));
+    const m2 = el("div", "m2"), text = el("span", null, it.ctx + (it.ctx && it.why ? " · " : ""));
+    if (it.why) { m2.append(el("span", "dot")); text.append(el("span", "why", it.why)); }
+    m2.append(text);
     return m2;
   }
   L.groups.forEach(([label, rows]) => {
@@ -557,7 +553,7 @@
       stop.type = "button";
       stop.addEventListener("click", () => stopItem(it));
       right.append(el("span", "mv mono", size), stop);
-      m1.append(el("span", why ? "dot" : "dot none"), el("span", "mname", name), right);
+      m1.append(el("span", "mname", name), right);
       it.m2 = detail(it);
       it.row.append(m1, it.m2);
       wi.append(it.row);
@@ -647,15 +643,6 @@
     .then((d) => { if (d.stargazers_count > 0) $("gh-meta").textContent = L.stars(d.stargazers_count); })
     .catch(() => {});
 
-  // ---------------------------------------------------------------- terminal install
-  const copy = $("copy");
-  const copyLabel = copy.textContent;
-  copy.addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(copy.title); } catch { return; }
-    copy.textContent = L.copied;
-    setTimeout(() => { copy.textContent = copyLabel; }, 1500);
-  });
-
   // ---------------------------------------------------------------- entrance: the numbers pile up, then fall into the popover
   const chaos = $("chaos");
   const CH = "0123456789%:. ";
@@ -729,7 +716,6 @@
   }
 
   chaos.addEventListener("click", () => { if (phase === "spawn" || phase === "converge") { timers.splice(0).forEach(clearTimeout); reveal(); } });
-  $("replay").addEventListener("click", () => { scrollTo({ top: 0 }); intro(); });
 
   renderPlan(); renderRam();
   intro();
