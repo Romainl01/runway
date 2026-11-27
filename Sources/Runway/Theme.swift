@@ -51,7 +51,7 @@ enum Theme {
     static let rowRadius: CGFloat = 8
     static let rowInset = EdgeInsets(top: 8, leading: 10, bottom: 8, trailing: 10)
     static let hairline: CGFloat = 1
-    /// Height of a control that spans its section (segmented control, "Check for Updates…"), so two of them
+    /// Height of a control that spans its section (segmented control, "Check for Updates"), so two of them
     /// stacked in Settings read as one family. Inline buttons ("Stop") stay at 22.
     static let fieldHeight: CGFloat = 28
 
@@ -341,7 +341,7 @@ struct MonoToggleStyle: ToggleStyle {
 /// Small bordered button (22 pt, radius 6): "Stop", "Cancel", "Force stop". `solid` is the confirming one;
 /// `destructive` is every stop ("Stop", its confirmation, "Force stop"): red text and outline, never filled;
 /// `fill` stretches it to the row's width at `Theme.fieldHeight`, row font size and `surface` fill
-/// ("Check for Updates…"), to match the segmented control it sits under.
+/// ("Check for Updates"), to match the segmented control it sits under.
 struct SmallButtonStyle: ButtonStyle {
     var solid = false
     var destructive = false

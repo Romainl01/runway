@@ -3,7 +3,7 @@ import Observation
 import Sparkle
 
 /// Sparkle 2, fed by the `appcast.xml` attached to the latest GitHub release (written by scripts/release.sh).
-/// Checks on its own once a day; "Check for Updates…" in Settings asks now.
+/// Checks on its own once a day; "Check for Updates" in Settings asks now.
 @MainActor
 @Observable
 final class Updater {

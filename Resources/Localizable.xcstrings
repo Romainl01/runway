@@ -481,18 +481,18 @@
         }
       }
     },
-    "Check for Updates…": {
+    "Check for Updates": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Check for Updates…"
+            "value": "Check for Updates"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rechercher des mises à jour…"
+            "value": "Rechercher des mises à jour"
           }
         }
       }

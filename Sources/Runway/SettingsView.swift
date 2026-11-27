@@ -41,7 +41,7 @@ struct SettingsView: View {
                         .onChange(of: launchAtLogin) { _, newValue in
                             if !LaunchAtLogin.set(newValue) { launchAtLogin = LaunchAtLogin.isEnabled }
                         }
-                    Button("Check for Updates…", action: updater.checkForUpdates)
+                    Button("Check for Updates", action: updater.checkForUpdates)
                         .buttonStyle(SmallButtonStyle(fill: true))
                         .disabled(!updater.canCheckForUpdates)
                 }
