@@ -139,11 +139,16 @@ struct Hairline: View {
 }
 
 /// 24 pt icon button, no background, surface on hover.
+/// Its label shows in a dark bubble under it on hover (a `.help` tooltip takes a second and is easy to miss).
+/// `tooltipEdge` is the side the bubble lines up with: `.trailing` for a button at the right edge of the panel,
+/// `.leading` at the left edge, so the bubble never runs out of the window. The row holding it needs `.zIndex(1)`
+/// or the views below draw over the bubble.
 struct IconButton: View {
     var systemImage: String
     var size: CGFloat = 12
     var help: String
     var spinning = false
+    var tooltipEdge: HorizontalAlignment = .trailing
     var action: () -> Void
 
     @State private var hovering = false
@@ -162,8 +167,92 @@ struct IconButton: View {
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
         .animation(Theme.transition, value: hovering)
-        .help(help)
+        .tooltip(help, edge: tooltipEdge)
         .accessibilityLabel(help)
+    }
+}
+
+extension View {
+    func tooltip(_ text: String, edge: HorizontalAlignment = .trailing) -> some View {
+        modifier(Tooltip(text: text, edge: edge))
+    }
+}
+
+/// The first bubble waits a beat, so sweeping the pointer across a row of icons doesn't flash them all;
+/// once one is up, moving to its neighbour shows the next one at once, without animation.
+private struct Tooltip: ViewModifier {
+    let text: String
+    let edge: HorizontalAlignment
+
+    @MainActor private static var lastHidden = Date.distantPast
+    private static let delay: Duration = .milliseconds(350)
+    private static let warmWindow: TimeInterval = 0.5
+
+    @State private var shown = false
+    @State private var animated = true
+    @State private var pending: Task<Void, Never>?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        content
+            .onHover { inside in inside ? show() : hide() }
+            // A zero-height anchor on the bottom edge, the bubble hanging from it: overlays don't take layout space.
+            .overlay(alignment: .bottom) {
+                Color.clear.frame(height: 0)
+                    .overlay(alignment: Alignment(horizontal: edge, vertical: .top)) {
+                        if shown {
+                            bubble
+                                .padding(.top, 6)
+                                .transition(.asymmetric(insertion: insertion, removal: .identity))
+                        }
+                    }
+            }
+            .onDisappear { pending?.cancel() }
+    }
+
+    /// Grows out of the button's corner; Reduce Motion keeps the fade only. Leaving is instant, so sliding to
+    /// a neighbour never shows two bubbles at once.
+    private var insertion: AnyTransition {
+        guard animated else { return .identity }
+        if reduceMotion { return .opacity }
+        return .opacity.combined(with: .scale(scale: 0.96, anchor: UnitPoint(x: edge == .leading ? 0 : 1, y: 0)))
+    }
+
+    private var bubble: some View {
+        Text(text)
+            .font(.system(size: 12, weight: .medium))
+            .foregroundStyle(.white)
+            .lineLimit(1)
+            .fixedSize()
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .background(Color.black.opacity(0.9), in: .rect(cornerRadius: Theme.controlRadius))
+            .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).strokeBorder(.white.opacity(0.12), lineWidth: Theme.hairline))
+            .shadow(color: .black.opacity(0.25), radius: 6, y: 2)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+    }
+
+    private func show() {
+        pending?.cancel()
+        if Date.now.timeIntervalSince(Self.lastHidden) < Self.warmWindow {
+            animated = false
+            shown = true
+            return
+        }
+        pending = Task { @MainActor in
+            try? await Task.sleep(for: Self.delay)
+            guard !Task.isCancelled else { return }
+            animated = true
+            withAnimation(Theme.transition) { shown = true }
+        }
+    }
+
+    private func hide() {
+        pending?.cancel()
+        guard shown else { return }
+        Self.lastHidden = .now
+        shown = false
     }
 }
 

@@ -14,7 +14,7 @@ struct SettingsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 6) {
-                IconButton(systemImage: "chevron.left", help: tr("Back"), action: onBack)
+                IconButton(systemImage: "chevron.left", help: tr("Back"), tooltipEdge: .leading, action: onBack)
                     .padding(.leading, -6)
                 Text("Settings")
                     .font(.system(size: 13, weight: .semibold))
@@ -23,6 +23,7 @@ struct SettingsView: View {
             }
             .frame(height: 24)
             .padding(Theme.padding)
+            .zIndex(1)
 
             Hairline()
 

@@ -1409,6 +1409,22 @@
         }
       }
     },
+    "Quit Runway": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quit Runway"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitter Runway"
+          }
+        }
+      }
+    },
     "RAM": {
       "localizations": {
         "en": {

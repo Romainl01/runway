@@ -165,9 +165,11 @@ struct UsageView: View {
                     }
                     // gearshape draws smaller than arrow.clockwise at the same point size: 12.5 pt matches them.
                     IconButton(systemImage: "gearshape", size: 12.5, help: tr("Settings"), action: onSettings)
+                    IconButton(systemImage: "power", help: tr("Quit Runway")) { NSApp.terminate(nil) }
                 }
             }
             .frame(height: 24)
+            .zIndex(1)
     }
 
     private func accountLines(now: Date) -> some View {
