@@ -52,16 +52,18 @@ printf 'APPL????' > "$APP/Contents/PkgInfo"
 # String Catalog -> en.lproj / fr.lproj (English is the source, French a translation).
 xcrun xcstringstool compile "$ROOT/Resources/Localizable.xcstrings" --output-directory "$APP/Contents/Resources"
 
-# App icon (black square, white mini gauge), rendered then packed as .icns.
+# App icon (black square, white plane), rendered then packed as .icns. The plane's outline lives in
+# scripts/PlaneGlyph.swift, so the script runs with that file in front.
 ICONSET="$ROOT/build/AppIcon.iconset"
 rm -rf "$ICONSET" && mkdir -p "$ICONSET"
-swift "$ROOT/scripts/make-icon.swift" "$ROOT/build/icon_1024.png"
+cat "$ROOT/scripts/PlaneGlyph.swift" "$ROOT/scripts/make-icon.swift" > "$ROOT/build/make-icon.swift"
+swift "$ROOT/build/make-icon.swift" "$ROOT/build/icon_1024.png"
 for s in 16 32 128 256 512; do
     sips -z $s $s "$ROOT/build/icon_1024.png" --out "$ICONSET/icon_${s}x${s}.png" >/dev/null
     sips -z $((s * 2)) $((s * 2)) "$ROOT/build/icon_1024.png" --out "$ICONSET/icon_${s}x${s}@2x.png" >/dev/null
 done
 iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/AppIcon.icns"
-rm -rf "$ICONSET" "$ROOT/build/icon_1024.png"
+rm -rf "$ICONSET" "$ROOT/build/icon_1024.png" "$ROOT/build/make-icon.swift"
 
 # Inside out: Sparkle's helpers, then the framework, then the app. Hardened runtime and a timestamp only
 # with a real identity: ad-hoc code has no team ID, so library validation would refuse Sparkle.
