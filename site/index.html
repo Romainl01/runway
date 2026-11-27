@@ -3,228 +3,737 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Runway · Claude usage in your menu bar</title>
-<meta name="description" content="Your Claude plan usage, always in the menu bar. A free, open source macOS app.">
+<title>Runway · Claude usage and RAM in your menu bar</title>
+<meta name="description" content="Your Claude plan usage and what is eating your RAM, right in the menu bar. A free, open source macOS app.">
 <meta name="color-scheme" content="dark light">
 <link rel="icon" href="images/icon.png">
 <meta property="og:title" content="Runway">
-<meta property="og:description" content="Your Claude plan usage, always in the menu bar.">
+<meta property="og:description" content="Claude limits and RAM, at a glance.">
 <meta property="og:image" content="images/hero-dark.png">
+<script>document.documentElement.classList.add("js")</script>
 <style>
   /* Tokens: the same values as Sources/Runway/Theme.swift. Dark first, like the app. */
   :root {
-    --background: #0A0A0A;
+    --bg: #0A0A0A;
     --surface: #111111;
     --border: #262626;
     --text: #EDEDED;
     --secondary: #A1A1A1;
     --tertiary: #8A8A8A;
+    --track: #262626;
+    --green: #30A46C;
+    --amber: #F5A524;
+    --red: #E5484D;
+    --shadow: 0 40px 80px -24px rgba(0, 0, 0, 0.9);
+    --btn-hover: #FFFFFF;
 
-    --size-title: 40px;
-    --size-body: 16px;
-    --size-small: 13px;
-
-    --space-1: 4px;
-    --space-2: 8px;
-    --space-3: 12px;
-    --space-4: 16px;
-    --space-6: 24px;
-    --space-8: 32px;
-    --space-12: 48px;
-    --space-20: 80px;
-
-    --radius-control: 6px;
-    --radius-panel: 12px;
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-    --duration: 150ms;
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 
     --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
     --mono: ui-monospace, "SF Mono", Menlo, monospace;
   }
   @media (prefers-color-scheme: light) {
     :root {
-      --background: #FFFFFF;
+      --bg: #FFFFFF;
       --surface: #FAFAFA;
       --border: #EAEAEA;
       --text: #171717;
       --secondary: #666666;
       --tertiary: #767676;
+      --track: #EAEAEA;
+      --shadow: 0 30px 60px -24px rgba(0, 0, 0, 0.18);
+      --btn-hover: #000000;
     }
   }
 
-  * { box-sizing: border-box; margin: 0; }
+  * { box-sizing: border-box; }
   body {
-    background: var(--background);
-    color: var(--text);
-    font: 400 var(--size-body)/1.6 var(--font);
-    -webkit-font-smoothing: antialiased;
+    margin: 0; min-height: 100vh; display: flex; flex-direction: column;
+    background: var(--bg); color: var(--text);
+    font: 400 17px/1.5 var(--font);
+    -webkit-font-smoothing: antialiased; overflow-x: clip;
   }
   a { color: inherit; }
-  .page { max-width: 760px; margin: 0 auto; padding: 0 var(--space-6); }
+  .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  [hidden] { display: none !important; }
 
-  header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: var(--space-6) 0;
+  /* Page: one screen, like the app it shows */
+  .page { flex: 1; width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; }
+  .hero {
+    flex: 1; display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 96px;
+    align-items: start; padding: 18vh 0 72px;
   }
-  .brand { display: flex; align-items: center; gap: var(--space-2); font-weight: 600; text-decoration: none; }
-  .brand img { width: 24px; height: 24px; border-radius: var(--radius-control); }
-  .link { color: var(--secondary); font-size: var(--size-small); text-decoration: none; }
-  .link:hover { color: var(--text); text-decoration: underline; }
-
-  .hero { padding: var(--space-20) 0 var(--space-12); text-align: center; }
-  h1 {
-    font-size: var(--size-title); line-height: 1.15; font-weight: 600;
-    letter-spacing: -0.02em; text-wrap: balance;
-  }
-  .lede { color: var(--secondary); margin: var(--space-4) auto 0; max-width: 520px; text-wrap: pretty; }
-
-  .download {
-    display: inline-flex; align-items: center; gap: var(--space-2);
-    margin-top: var(--space-8); padding: var(--space-3) var(--space-6);
-    background: var(--text); color: var(--background);
-    border-radius: var(--radius-control);
-    font-weight: 500; text-decoration: none;
-    transition: opacity var(--duration) var(--ease-out);
-  }
-  .download:hover { opacity: 0.88; }
-  .download:active { opacity: 0.76; }
-  .download svg { width: 16px; height: 16px; }
-  .meta { margin-top: var(--space-3); color: var(--tertiary); font-size: var(--size-small); }
-
-  .shot { display: block; margin: 0 auto var(--space-20); }
-  .shot img {
-    display: block; width: 100%; height: auto;
-    border: 1px solid var(--border); border-radius: var(--radius-panel);
-  }
-
-  section { padding: var(--space-12) 0; border-top: 1px solid var(--border); }
-  h2 { font-size: var(--size-body); font-weight: 600; }
-  .features { list-style: none; padding: 0; margin-top: var(--space-6); display: grid; gap: var(--space-6); }
-  .features p, section > p { color: var(--secondary); }
-  section > p { margin-top: var(--space-2); }
-  .features strong { font-weight: 500; color: var(--text); }
-
-  .terminal {
-    display: flex; align-items: center; gap: var(--space-3);
-    margin-top: var(--space-4); padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-control);
-  }
-  .terminal code {
-    flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap;
-    font: var(--size-small)/1.6 var(--mono); color: var(--text);
-  }
-  .copy {
-    flex: none; padding: var(--space-1) var(--space-2);
-    background: none; border: 1px solid var(--border); border-radius: var(--radius-control);
-    color: var(--secondary); font: inherit; font-size: var(--size-small); cursor: pointer;
-  }
-  .copy:hover { color: var(--text); }
-
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+  .brand img { width: 24px; height: 24px; border-radius: 6px; box-shadow: 0 0 0 1px var(--border); }
+  h1 { margin: 40px 0 0; font-size: 44px; line-height: 1.1; font-weight: 600; letter-spacing: -0.02em; text-wrap: balance; }
+  .lede { margin: 16px 0 0; color: var(--secondary); max-width: 460px; text-wrap: pretty; }
+  .hint { margin: 16px 0 0; font-size: 13px; color: var(--tertiary); }
   footer {
-    display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); justify-content: space-between;
-    padding: var(--space-8) 0 var(--space-12); border-top: 1px solid var(--border);
-    color: var(--tertiary); font-size: var(--size-small);
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px;
+    padding: 24px 0 32px; font-size: 13px; color: var(--tertiary);
   }
-  footer nav { display: flex; gap: var(--space-4); }
+  footer .rule { flex: 1; min-width: 24px; height: 1px; background: var(--border); }
+  footer a, footer button { color: inherit; text-decoration: none; background: none; border: 0; padding: 0; font: inherit; cursor: pointer; }
+  footer a:hover, footer button:hover { color: var(--text); }
 
-  @media (max-width: 560px) {
-    :root { --size-title: 32px; }
-    .hero { padding-top: var(--space-12); }
+  /* Entrance, once: opacity + 12 px rise + blur, staggered */
+  .js .rv { opacity: 0; transform: translateY(12px); filter: blur(8px); transition: opacity 600ms var(--ease-out), transform 600ms var(--ease-out), filter 600ms var(--ease-out); }
+  .js.revealed .rv { opacity: 1; transform: none; filter: none; }
+
+  .chaos { position: fixed; inset: 0; z-index: 50; background: var(--bg); cursor: pointer; transition: opacity 400ms var(--ease-out); }
+  .chaos.out { opacity: 0; pointer-events: none; }
+  .ck {
+    position: absolute; font-size: 13px; color: var(--secondary); white-space: nowrap; opacity: 0.7;
+    animation: ck-in 200ms var(--ease-out);
+    transition: transform 600ms var(--ease-drawer), opacity 500ms var(--ease-out), filter 400ms var(--ease-out);
+  }
+  @keyframes ck-in { from { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } }
+
+  /* Buttons */
+  .btns { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
+  .bwrap { position: relative; display: flex; flex-direction: column; align-items: flex-start; }
+  .btn {
+    position: relative; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 18px;
+    border: 1px solid transparent; border-radius: 6px; font-size: 15px; font-weight: 500; text-decoration: none;
+    transition: transform 200ms var(--ease-out), background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+  }
+  .btn svg { flex: none; }
+  .btn-primary { background: var(--text); color: var(--bg); }
+  .btn-ghost { border-color: var(--border); color: var(--secondary); }
+  .bmeta {
+    position: absolute; top: 100%; left: 0; margin-top: 8px; white-space: nowrap; font-size: 13px; color: var(--tertiary);
+    opacity: 0; transform: translateY(-4px) scale(0.96); transform-origin: top left; pointer-events: none;
+    transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .btn:hover { transform: scale(1.03); }
+    .btn-primary:hover { background: var(--btn-hover); }
+    .btn-ghost:hover { border-color: var(--tertiary); color: var(--text); }
+    .bwrap:hover .bmeta { opacity: 1; transform: none; }
+  }
+  .btn:active { transform: scale(0.97); transition-duration: 120ms; }
+  .btn:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .bwrap:focus-within .bmeta { opacity: 1; transform: none; }
+  .star { position: absolute; left: 50%; top: 0; color: var(--tertiary); pointer-events: none; line-height: 1; opacity: 0; animation: star var(--dur) ease-out forwards; }
+  @keyframes star {
+    from { opacity: 0.5; transform: translate(-50%, 0) scale(1); }
+    to { opacity: 0; transform: translate(calc(-50% + var(--tx)), var(--ty)) scale(0.3); }
+  }
+
+  /* The popover, as in the app: 320 pt, 16 padding, 13 / 12 / 11 */
+  .tilt { transition: transform 300ms var(--ease-out); }
+  .pop {
+    position: relative; width: 320px; max-width: 100%;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow);
+    font-size: 13px; line-height: 1.35;
+  }
+  .ph { padding: 16px 16px 0; display: flex; flex-direction: column; gap: 3px; }
+  .ph-top { display: flex; align-items: center; gap: 8px; height: 24px; margin-bottom: 2px; }
+  .ph-name { font-weight: 600; }
+  .pill { font-size: 11px; line-height: 16px; padding: 0 6px; border: 1px solid var(--border); border-radius: 4px; color: var(--secondary); }
+  .icons { margin-left: auto; display: flex; gap: 2px; }
+  .ib {
+    position: relative; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 6px;
+    background: none; color: var(--secondary); display: grid; place-items: center; cursor: pointer;
+    transition: background-color 150ms ease, color 150ms ease;
+  }
+  .ib:hover { background: var(--surface); color: var(--text); }
+  .bubble {
+    position: absolute; top: calc(100% + 6px); right: 0; z-index: 5;
+    padding: 6px 8px; border-radius: 6px; background: rgba(0, 0, 0, 0.9); box-shadow: 0 0 0 1px var(--border);
+    color: #FFFFFF; font-size: 12px; font-weight: 500; line-height: 1; white-space: nowrap;
+    opacity: 0; pointer-events: none;
+  }
+  .ib:hover .bubble { opacity: 1; transition: opacity 0ms 350ms; }
+  .ph-line { font-size: 11px; color: var(--secondary); }
+  .ph-status { font-size: 11px; color: var(--tertiary); }
+  .tabs { margin: 12px 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 2px; border: 1px solid var(--border); border-radius: 6px; }
+  .tab { height: 24px; border: 0; border-radius: 4px; background: none; color: var(--secondary); font: inherit; font-size: 12px; cursor: pointer; }
+  .tab[aria-selected="true"] { background: var(--track); color: var(--text); font-weight: 500; }
+  .sep { height: 1px; background: var(--border); }
+  .pbody { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+  .grow {
+    display: block; width: calc(100% + 16px); margin: -8px; padding: 8px; border: 0; border-radius: 8px;
+    background: none; color: inherit; font: inherit; text-align: left; cursor: pointer;
+    transition: background-color 150ms ease;
+  }
+  @media (hover: hover) { .grow:hover { background: var(--surface); } }
+  .grow:active { background: var(--track); }
+  .g-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .g-label { display: flex; align-items: center; gap: 6px; color: var(--secondary); }
+  .g-val { font-weight: 600; }
+  .g-val small { font-size: 13px; font-weight: 400; color: var(--tertiary); }
+  .g-track { display: block; height: 4px; margin: 8px 0 6px; border-radius: 2px; background: var(--track); overflow: hidden; }
+  .g-fill { display: block; height: 100%; border-radius: 2px; transform: scaleX(0); transform-origin: left; transition: transform 300ms var(--ease-out), background-color 150ms ease; }
+  .intro .g-fill { transition-duration: 900ms, 150ms; }
+  .g-meta { display: block; font-size: 11px; color: var(--tertiary); }
+  .cap { font-size: 11px; line-height: 16px; padding: 0 5px; border: 1px solid var(--red); border-radius: 4px; color: var(--red); }
+  .pfoot { display: flex; align-items: center; padding: 12px 16px; font-size: 12px; color: var(--secondary); }
+  .pfoot a, .lnk { color: inherit; text-decoration: none; background: none; border: 0; padding: 0; font: inherit; cursor: pointer; }
+  .pfoot a:hover, .lnk:hover { text-decoration: underline; }
+  .lnk { margin-left: auto; }
+
+  /* Memory rows: a stopped row slides out blurred, then its height folds (grid rows) */
+  .coll { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 250ms var(--ease-drawer), opacity 200ms ease; }
+  .coll > div { min-height: 0; overflow: hidden; }
+  .coll.gone { grid-template-rows: 0fr; opacity: 0; }
+  .grp { padding-bottom: 12px; }
+  .grp-h { margin-bottom: 2px; font-size: 11px; font-weight: 500; color: var(--tertiary); }
+  .mrow {
+    position: relative; margin: 0 -8px; padding: 6px 8px; border-radius: 6px;
+    transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out), filter 200ms var(--ease-out), background-color 150ms ease;
+  }
+  .mrow.leaving { opacity: 0; transform: translateX(32px); filter: blur(4px); }
+  .m1 { display: flex; align-items: center; gap: 8px; height: 18px; }
+  .dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--amber); }
+  .dot.none { background: transparent; }
+  .mname { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mright { position: relative; flex: none; display: flex; justify-content: flex-end; align-items: center; min-width: 64px; height: 18px; }
+  .mv { font-size: 12px; color: var(--secondary); transition: opacity 150ms ease; }
+  .stop {
+    position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+    padding: 2px 8px; border: 1px solid var(--red); border-radius: 6px; background: none;
+    color: var(--red); font: inherit; font-size: 11px; line-height: 14px; white-space: nowrap; cursor: pointer;
+    opacity: 0; pointer-events: none; transition: opacity 150ms ease, background-color 150ms ease;
+  }
+  .stop:hover { background: rgba(229, 72, 77, 0.12); }
+  .stop:focus-visible { opacity: 1; pointer-events: auto; outline: 2px solid var(--red); outline-offset: 1px; }
+  @media (hover: hover) {
+    .mrow:hover { background: var(--surface); }
+    .mrow:hover .stop { opacity: 1; pointer-events: auto; }
+    .mrow:hover .mv { opacity: 0; }
+  }
+  @media (hover: none) { .stop { opacity: 1; pointer-events: auto; } .mv { opacity: 0; } }
+  .mrow.stopping .stop, .mrow.stopping .mv { opacity: 0; pointer-events: none; }
+  .m2 { margin-top: 2px; padding-left: 14px; font-size: 11px; color: var(--tertiary); }
+  .m2 .why { color: var(--secondary); }
+  .shim {
+    background: linear-gradient(90deg, var(--tertiary) 0%, var(--text) 50%, var(--tertiary) 100%);
+    background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: shim 1.4s linear infinite;
+  }
+  @keyframes shim { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+  .empty { padding: 4px 0 8px; text-align: center; font-size: 12px; color: var(--tertiary); }
+  .toast {
+    position: absolute; left: 12px; right: 12px; bottom: 52px; z-index: 4;
+    display: flex; align-items: center; gap: 6px; padding: 10px 12px; border-radius: 8px;
+    border: 1px solid rgba(48, 164, 108, 0.45);
+    background: linear-gradient(rgba(48, 164, 108, 0.14), rgba(48, 164, 108, 0.14)), var(--bg);
+    box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.5); font-size: 12px;
+    opacity: 0; transform: translateY(8px); pointer-events: none;
+    transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out);
+  }
+  .toast.on { opacity: 1; transform: none; }
+  .toast svg { flex: none; color: var(--green); }
+
+  /* macOS-style notification: in from the right edge, out the same way */
+  .notif {
+    position: fixed; top: 16px; right: 16px; z-index: 60; width: 340px; max-width: calc(100% - 32px);
+    display: flex; gap: 10px; align-items: flex-start; padding: 12px; border-radius: 14px;
+    background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow);
+    transform: translateX(calc(100% + 40px)); opacity: 0;
+    transition: transform 300ms var(--ease-drawer), opacity 300ms ease;
+  }
+  .notif.on { transform: none; opacity: 1; }
+  .notif img { flex: none; width: 32px; height: 32px; border-radius: 8px; box-shadow: 0 0 0 1px var(--border); }
+  .n-app { font-size: 11px; color: var(--tertiary); }
+  .n-t { margin-top: 1px; font-size: 13px; font-weight: 600; }
+  .n-b { margin-top: 1px; font-size: 12px; color: var(--secondary); }
+
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: minmax(0, 1fr); gap: 56px; padding-top: 48px; }
+    .col-pop { order: 2; }
+    h1 { font-size: 32px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .js .rv { transform: none; filter: none; transition: opacity 200ms ease; }
+    .btn:hover, .btn:active { transform: none; }
+    .notif { transform: none; }
+    .mrow.leaving { transform: none; filter: none; }
+    .shim { animation: none; background: none; color: var(--secondary); }
   }
 </style>
 </head>
 <body>
-<div class="page">
-  <header>
-    <a class="brand" href="/"><img src="images/icon.png" alt="">Runway</a>
-    <a class="link" href="https://github.com/Romainl01/runway">GitHub</a>
-  </header>
+<div class="notif" id="notif" role="status" aria-live="polite">
+  <img src="images/icon.png" alt="">
+  <div><div class="n-app">Runway</div><div class="n-t" id="notif-title"></div><div class="n-b" id="notif-body"></div></div>
+</div>
 
-  <main>
-    <div class="hero">
-      <h1 data-i18n="title">Your Claude plan usage, always in the menu bar.</h1>
-      <p class="lede" data-i18n="lede">See how much of your 5-hour session and weekly limit is left at a glance, and get a heads-up before you hit the wall.</p>
-      <a class="download" href="https://github.com/Romainl01/runway/releases/latest/download/Runway.dmg">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8.5M4.5 7 8 10.5 11.5 7M3 13.5h10"/></svg>
-        <span data-i18n="download">Download for Mac</span>
-      </a>
-      <p class="meta" data-i18n="meta">Free and open source · macOS 26 or later · Apple silicon and Intel</p>
+<div class="page">
+  <main class="hero">
+    <div class="col-pop rv" style="transition-delay: 160ms">
+      <div class="tilt" id="tilt">
+        <div class="pop" id="pop">
+          <div class="ph">
+            <div class="ph-top">
+              <span class="ph-name">Runway</span>
+              <span class="pill" id="plan-pill">Max 5x</span>
+              <div class="icons">
+                <button type="button" class="ib" data-i18n-label="refresh"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36L21 8"/><path d="M21 3v5h-5"/></svg><span class="bubble" data-i18n="refresh">Refresh</span></button>
+                <button type="button" class="ib" data-i18n-label="settings"><svg viewBox="0 0 24 24" width="13.5" height="13.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="bubble" data-i18n="settings">Settings</span></button>
+                <button type="button" class="ib" data-i18n-label="quitRunway"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><path d="M12 2v10"/></svg><span class="bubble" data-i18n="quitRunway">Quit Runway</span></button>
+              </div>
+            </div>
+            <div class="ph-line">you@example.com · Team</div>
+            <div class="ph-status" data-i18n="updated">Updated 8 s ago</div>
+          </div>
+          <div class="tabs" role="tablist">
+            <button type="button" class="tab" role="tab" id="tab-plan" aria-selected="true" data-i18n="plan">Plan</button>
+            <button type="button" class="tab" role="tab" id="tab-mem" aria-selected="false" data-i18n="memory">Memory</button>
+          </div>
+          <div class="sep"></div>
+
+          <div class="pbody" id="body-plan">
+            <button type="button" class="grow" id="session">
+              <span class="g-head"><span class="g-label"><span data-i18n="session">Session</span><span class="cap" id="s-cap" data-i18n="cap" hidden>Cap reached</span></span><span class="g-val mono" id="s-val">18%</span></span>
+              <span class="g-track"><span class="g-fill" id="s-fill"></span></span>
+              <span class="g-meta" id="s-meta">Resets 3:30 PM · in 1h 30m</span>
+              <span class="g-meta" id="s-pace" style="margin-top: 2px">At this pace: ~26% at reset</span>
+            </button>
+            <div>
+              <div class="g-head"><span class="g-label" data-i18n="weekly">Weekly</span><span class="g-val mono" id="w-val">73%</span></div>
+              <div class="g-track"><div class="g-fill" id="w-fill"></div></div>
+              <div class="g-meta" data-i18n="weeklyReset">Resets Mon, Nov 30, 2:00 PM</div>
+            </div>
+            <div>
+              <div class="g-head"><span class="g-label" data-i18n="weeklyFable">Weekly · Fable</span><span class="g-val mono" id="f-val">0%</span></div>
+              <div class="g-track"><div class="g-fill" id="f-fill"></div></div>
+              <div class="g-meta" data-i18n="weeklyReset">Resets Mon, Nov 30, 2:00 PM</div>
+            </div>
+          </div>
+
+          <div class="pbody" id="body-mem" hidden>
+            <div>
+              <div class="g-head"><span class="g-label">RAM</span><span class="g-val mono"><span id="ram-val">26.1</span><small id="ram-total"> / 32 GB</small></span></div>
+              <div class="g-track"><div class="g-fill" id="ram-fill"></div></div>
+              <div class="g-meta" id="ram-press">Medium pressure</div>
+            </div>
+            <div>
+              <div class="g-head"><span class="g-label" data-i18n="swap">Swap (on disk)</span><span class="g-val mono" id="swap-val">6.4 GB</span></div>
+              <div class="g-track"><div class="g-fill" id="swap-fill" style="opacity: 0.6"></div></div>
+            </div>
+            <div>
+              <div id="groups"></div>
+              <div class="coll gone" id="empty"><div><div class="empty" data-i18n="empty">Nothing left to stop.</div></div></div>
+            </div>
+          </div>
+
+          <div class="toast" id="toast" role="status">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            <span id="toast-name"></span><span id="toast-freed" style="color: var(--secondary)"></span>
+          </div>
+          <div class="sep"></div>
+          <div class="pfoot">
+            <a href="https://claude.ai/settings/usage" target="_blank" rel="noopener noreferrer" id="details" data-i18n="details">Details on claude.ai ↗</a>
+            <button type="button" class="lnk" data-i18n="quit">Quit</button>
+          </div>
+        </div>
+      </div>
+      <p class="hint" data-i18n="hint">Click Session, or stop something in Memory.</p>
     </div>
 
-    <picture class="shot">
-      <source media="(prefers-color-scheme: light)" srcset="images/hero-light.png">
-      <img src="images/hero-dark.png" width="1280" height="872" data-i18n-alt="shotAlt" alt="Runway's menu bar popover: session at 18%, weekly limit at 73%, reset times and a pace projection">
-    </picture>
-
-    <section>
-      <h2 data-i18n="featuresTitle">What it shows</h2>
-      <ul class="features">
-        <li><p data-i18n-html="f1"><strong>Every limit in one popover.</strong> Session, weekly, per-model weekly limits and extra usage credits, with reset times.</p></li>
-        <li><p data-i18n-html="f2"><strong>Where your pace leads.</strong> “At this pace: ~41% at reset”, or a warning when you are on track to hit 100% first.</p></li>
-        <li><p data-i18n-html="f3"><strong>A heads-up in time.</strong> Notifications at 50, 80 and 95%, once per window, and an optional notice when the session refills.</p></li>
-        <li><p data-i18n-html="f4"><strong>Colour only when it matters.</strong> Monochrome until 80%, amber from there, red from 95%. Follows light and dark mode.</p></li>
-      </ul>
-    </section>
-
-    <section>
-      <h2 data-i18n="setupTitle">Zero setup</h2>
-      <p data-i18n="setup">If Claude Code is installed and logged in on your Mac, Runway just works. Your token is read from your keychain, only ever sent to api.anthropic.com, and never stored. No account, no analytics.</p>
-    </section>
-
-    <section>
-      <h2 data-i18n="terminalTitle">Prefer the terminal?</h2>
-      <div class="terminal">
-        <code id="cmd">curl -fsSL https://raw.githubusercontent.com/Romainl01/runway/main/install.sh | bash</code>
-        <button class="copy" type="button" data-i18n="copy">Copy</button>
+    <div>
+      <div class="brand rv"><img src="images/icon.png" alt="">Runway</div>
+      <h1 class="rv" style="transition-delay: 80ms" data-i18n="title">Claude limits and RAM, at a glance.</h1>
+      <p class="lede rv" style="transition-delay: 160ms" data-i18n="lede">Runway keeps your Claude session and weekly limit in the menu bar, and spots the simulators, dev servers and idle Claude Code sessions eating your memory.</p>
+      <div class="btns rv" style="transition-delay: 240ms">
+        <div class="bwrap">
+          <a class="btn btn-primary" href="https://github.com/Romainl01/runway/releases/latest/download/Runway.dmg">
+            <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8.5M4.5 7 8 10.5 11.5 7M3 13.5h10"/></svg>
+            <span data-i18n="download">Download for Mac</span>
+          </a>
+          <span class="bmeta" data-i18n="downloadMeta">Free · macOS 26 or later</span>
+        </div>
+        <div class="bwrap" id="gh">
+          <a class="btn btn-ghost" id="gh-btn" href="https://github.com/Romainl01/runway" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            <span data-i18n="github">Star on GitHub</span>
+          </a>
+          <span class="bmeta" id="gh-meta" data-i18n="githubMeta">Open source · MIT license</span>
+        </div>
       </div>
-    </section>
+    </div>
   </main>
 
-  <footer>
+  <footer class="rv" style="transition-delay: 400ms">
     <span data-i18n="disclaimer">MIT license. Not affiliated with Anthropic.</span>
-    <nav>
-      <a class="link" href="https://github.com/Romainl01/runway/releases" data-i18n="releases">Releases</a>
-      <a class="link" href="https://github.com/Romainl01/runway">GitHub</a>
-    </nav>
+    <span class="rule"></span>
+    <button type="button" id="copy" title="curl -fsSL https://raw.githubusercontent.com/Romainl01/runway/main/install.sh | bash" data-i18n="terminal">Install from the terminal</button>
+    <button type="button" id="replay" data-i18n="replay">Replay intro</button>
+    <a href="https://github.com/Romainl01/runway/releases" data-i18n="releases">Releases</a>
   </footer>
 </div>
 
+<div class="chaos" id="chaos" aria-hidden="true" hidden></div>
+
 <script>
-  // English is the source; French follows the browser language, like the app follows the Mac's.
-  const fr = {
-    title: "La conso de votre forfait Claude, toujours dans la barre de menus.",
-    lede: "Voyez d’un coup d’œil ce qu’il reste de votre session de 5 h et de votre limite hebdo, et soyez prévenu avant d’arriver au bout.",
+(() => {
+  const fr = navigator.language.toLowerCase().startsWith("fr");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const fine = matchMedia("(hover: hover) and (pointer: fine)").matches && !reduce;
+  const html = document.documentElement;
+  const $ = (id) => document.getElementById(id);
+  const sp = " ";
+
+  // English is the source; French follows the browser, like the app follows the Mac.
+  // Strings inside the popover are the app's own (Resources/Localizable.xcstrings).
+  const STATIC_FR = {
+    title: "Limites Claude et RAM, d’un coup d’œil.",
+    lede: "Runway garde votre session et votre limite hebdo Claude dans la barre de menus, et repère les simulateurs, serveurs de dev et sessions Claude Code inactives qui mangent votre mémoire.",
     download: "Télécharger pour Mac",
-    meta: "Gratuit et open source · macOS 26 ou plus récent · Apple silicon et Intel",
-    shotAlt: "Le panneau de Runway dans la barre de menus : session à 18 %, limite hebdo à 73 %, heures de reset et projection du rythme",
-    featuresTitle: "Ce qu’il affiche",
-    f1: "<strong>Toutes les limites dans un panneau.</strong> Session, semaine, limites hebdo par modèle et crédits d’usage, avec les heures de reset.",
-    f2: "<strong>Où mène votre rythme.</strong> « À ce rythme : ~41 % au reset », ou une alerte si vous allez atteindre 100 % avant.",
-    f3: "<strong>Prévenu à temps.</strong> Notifications à 50, 80 et 95 %, une fois par fenêtre, et en option quand la session se recharge.",
-    f4: "<strong>De la couleur seulement quand ça compte.</strong> Monochrome jusqu’à 80 %, ambre ensuite, rouge dès 95 %. Suit le mode clair et sombre.",
-    setupTitle: "Rien à configurer",
-    setup: "Si Claude Code est installé et connecté sur votre Mac, Runway marche tout seul. Votre token est lu dans le Trousseau, envoyé uniquement à api.anthropic.com et jamais stocké. Pas de compte, pas d’analytics.",
-    terminalTitle: "Plutôt le terminal ?",
-    copy: "Copier",
-    copied: "Copié",
+    downloadMeta: "Gratuit · macOS 26 ou plus récent",
+    github: "Voir sur GitHub",
+    githubMeta: "Open source · licence MIT",
+    hint: "Cliquez sur Session, ou arrêtez quelque chose dans Mémoire.",
     disclaimer: "Licence MIT. Non affilié à Anthropic.",
+    terminal: "Installer depuis le terminal",
+    replay: "Revoir l’intro",
     releases: "Versions",
+    refresh: "Rafraîchir", settings: "Réglages", quitRunway: "Quitter Runway", quit: "Quitter",
+    updated: "Mis à jour il y a 8" + sp + "s",
+    plan: "Forfait", memory: "Mémoire", session: "Session", cap: "Plafond atteint",
+    weekly: "Semaine", weeklyFable: "Semaine · Fable", weeklyReset: "Reset lun. 30 nov. 14:00",
+    swap: "Swap (sur le disque)", empty: "Plus rien à arrêter.", details: "Détail sur claude.ai ↗",
   };
-  const t = navigator.language.startsWith("fr") ? fr : null;
-  if (t) {
-    document.documentElement.lang = "fr";
-    document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t[el.dataset.i18n]);
-    document.querySelectorAll("[data-i18n-html]").forEach(el => el.innerHTML = t[el.dataset.i18nHtml]);
-    document.querySelectorAll("[data-i18n-alt]").forEach(el => el.alt = t[el.dataset.i18nAlt]);
+
+  const EN = {
+    pct: (v) => v + "%",
+    steps: [
+      { v: 18, meta: "Resets 3:30 PM · in 1h 30m", pace: "At this pace: ~26% at reset" },
+      { v: 52, meta: "Resets 3:30 PM · in 1h 12m", pace: "At this pace: ~74% at reset", notif: ["Session at 50%", "Resets at 3:30 PM."] },
+      { v: 83, meta: "Resets 3:30 PM · in 58 min", pace: "At this pace: 100% at 3:04 PM, 26 min before reset", notif: ["Session at 80%", "Resets at 3:30 PM."] },
+      { v: 96, meta: "Resets 3:30 PM · in 44 min", pace: "At this pace: 100% at 2:52 PM, 38 min before reset", notif: ["Session at 95%", "Resets at 3:30 PM."] },
+      { v: 100, cap: true, meta: "Resets 3:30 PM · in 40 min", pace: "" },
+      { v: 0, meta: "No session in progress", pace: "", notif: ["Session reset", "Your 5h session starts over from zero."] },
+    ],
+    gb: (x) => x.toFixed(1) + " GB", num: (x) => x.toFixed(1), total: " / 32 GB",
+    pressure: (normal) => normal ? "Normal pressure" : "Medium pressure",
+    stopping: "Stopping…", stopped: (n) => n + " stopped", freed: (s) => "· " + s + " freed", stop: "Stop",
+    groups: [
+      ["Simulators", [["iPhone 16 Pro", "my-app", "idle for 2 h", 2.1, "2.1 GB"], ["iPhone SE", "", "no app open", 1.1, "1.1 GB"]]],
+      ["Local servers", [["my-app", ":8081 expo start", "orphan", 2.0, "2.0 GB"], ["web", ":3000 next dev", "", 0.8, "819 MB"]]],
+      ["Claude Code", [["Fix the onboarding paywall", "my-app", "no message for 5 h", 0.6, "614 MB"], ["Add dark mode", "web", "", 0.4, "410 MB"]]],
+    ],
+    tokens: ["18%", "73%", "94%", "100%", "41%", "87%", "97%", "resets 3:30 PM", "in 1h 30m", "~26% at reset", "in 4d 2h",
+      "26.1 GB", "6.4 GB", ":8081 expo start", ":3000 next dev", "iPhone 16 Pro", "idle for 2 h", "orphan", "no message for 5 h"],
+    copied: "Command copied", stars: (n) => "★ " + n.toLocaleString("en") + " stars · Open source",
+  };
+  const FR = {
+    pct: (v) => v + sp + "%",
+    steps: [
+      { v: 18, meta: "Reset 15:30 · dans 1" + sp + "h" + sp + "30", pace: "À ce rythme" + sp + ": ~26" + sp + "% au reset" },
+      { v: 52, meta: "Reset 15:30 · dans 1" + sp + "h" + sp + "12", pace: "À ce rythme" + sp + ": ~74" + sp + "% au reset", notif: ["Session à 50" + sp + "%", "Reset à 15:30."] },
+      { v: 83, meta: "Reset 15:30 · dans 58" + sp + "min", pace: "À ce rythme" + sp + ": 100" + sp + "% vers 15:04, 26" + sp + "min avant le reset", notif: ["Session à 80" + sp + "%", "Reset à 15:30."] },
+      { v: 96, meta: "Reset 15:30 · dans 44" + sp + "min", pace: "À ce rythme" + sp + ": 100" + sp + "% vers 14:52, 38" + sp + "min avant le reset", notif: ["Session à 95" + sp + "%", "Reset à 15:30."] },
+      { v: 100, cap: true, meta: "Reset 15:30 · dans 40" + sp + "min", pace: "" },
+      { v: 0, meta: "Pas de session en cours", pace: "", notif: ["Session rechargée", "Ta session de 5" + sp + "h repart de zéro."] },
+    ],
+    gb: (x) => x.toFixed(1).replace(".", ",") + sp + "Go", num: (x) => x.toFixed(1).replace(".", ","), total: " / 32" + sp + "Go",
+    pressure: (normal) => normal ? "Pression normale" : "Pression moyenne",
+    stopping: "Arrêt en cours…", stopped: (n) => n + " arrêté", freed: (s) => "· " + s + " libérés", stop: "Arrêter",
+    groups: [
+      ["Simulateurs", [["iPhone 16 Pro", "my-app", "inactif depuis 2" + sp + "h", 2.1, "2,1" + sp + "Go"], ["iPhone SE", "", "aucune app ouverte", 1.1, "1,1" + sp + "Go"]]],
+      ["Serveurs locaux", [["my-app", ":8081 expo start", "orphelin", 2.0, "2,0" + sp + "Go"], ["web", ":3000 next dev", "", 0.8, "819" + sp + "Mo"]]],
+      ["Claude Code", [["Fix the onboarding paywall", "my-app", "aucun message depuis 5" + sp + "h", 0.6, "614" + sp + "Mo"], ["Add dark mode", "web", "", 0.4, "410" + sp + "Mo"]]],
+    ],
+    tokens: ["18 %", "73 %", "94 %", "100 %", "41 %", "87 %", "97 %", "reset 15:30", "dans 1 h 30", "~26 % au reset", "dans 4 j 2 h",
+      "26,1 Go", "6,4 Go", ":8081 expo start", ":3000 next dev", "iPhone 16 Pro", "inactif depuis 2 h", "orphelin", "aucun message depuis 5 h"],
+    copied: "Commande copiée", stars: (n) => "★ " + n.toLocaleString("fr") + " étoiles · Open source",
+  };
+  const L = fr ? FR : EN;
+
+  if (fr) {
+    html.lang = "fr";
+    document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = STATIC_FR[el.dataset.i18n]; });
+  }
+  document.querySelectorAll("[data-i18n-label]").forEach((el) => {
+    el.setAttribute("aria-label", el.querySelector(".bubble").textContent);
+  });
+
+  // ---------------------------------------------------------------- popover state
+  const timers = [];
+  const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+  let sIdx = 0, gaugesOn = false, freed = 0, restoreT = 0;
+  const sev = (v) => v >= 95 ? "var(--red)" : v >= 80 ? "var(--amber)" : "var(--green)";
+  const setFill = (el, v, color) => {
+    el.style.transform = "scaleX(" + (gaugesOn ? Math.min(v, 100) / 100 : 0) + ")";
+    el.style.backgroundColor = color;
+  };
+
+  function renderPlan() {
+    const st = L.steps[sIdx];
+    $("s-val").textContent = L.pct(st.v);
+    $("s-meta").textContent = st.meta;
+    $("s-pace").textContent = st.pace;
+    $("s-pace").hidden = !st.pace;
+    $("s-cap").hidden = !st.cap;
+    setFill($("s-fill"), st.v, sev(st.v));
+    setFill($("w-fill"), 73, sev(73));
+    setFill($("f-fill"), 0, sev(0));
+    $("w-val").textContent = L.pct(73);
+    $("f-val").textContent = L.pct(0);
+  }
+  function renderRam() {
+    const used = Math.max(0, 26.1 - freed), normal = used <= 24, color = normal ? "var(--green)" : "var(--amber)";
+    $("ram-val").textContent = L.num(used);
+    $("ram-total").textContent = L.total;
+    $("ram-press").textContent = L.pressure(normal);
+    $("swap-val").textContent = L.gb(6.4);
+    setFill($("ram-fill"), used / 32 * 100, color);
+    setFill($("swap-fill"), 6.4 / 32 * 100, color);
   }
 
-  const copy = document.querySelector(".copy");
-  const label = copy.textContent;
-  copy.addEventListener("click", async () => {
-    await navigator.clipboard.writeText(document.getElementById("cmd").textContent);
-    copy.textContent = t ? t.copied : "Copied";
-    setTimeout(() => copy.textContent = label, 1500);
+  function fillGauges() {
+    gaugesOn = true;
+    const pop = $("pop");
+    pop.classList.add("intro");
+    $("w-fill").style.transitionDelay = "140ms";
+    $("f-fill").style.transitionDelay = "280ms";
+    renderPlan(); renderRam();
+    later(() => {
+      pop.classList.remove("intro");
+      $("w-fill").style.transitionDelay = $("f-fill").style.transitionDelay = "";
+    }, 1500);
+  }
+
+  // Notifications and toast: transitions, so a new one retargets instead of restarting.
+  let notifT = 0, toastT = 0;
+  function notify([title, body]) {
+    clearTimeout(notifT);
+    $("notif-title").textContent = title;
+    $("notif-body").textContent = body;
+    $("notif").classList.add("on");
+    notifT = setTimeout(() => $("notif").classList.remove("on"), 3600);
+  }
+  function toast(name, size) {
+    clearTimeout(toastT);
+    $("toast-name").textContent = L.stopped(name);
+    $("toast-freed").textContent = L.freed(size);
+    $("toast").classList.add("on");
+    toastT = setTimeout(() => $("toast").classList.remove("on"), 3000);
+  }
+
+  $("session").addEventListener("click", () => {
+    sIdx = (sIdx + 1) % L.steps.length;
+    renderPlan();
+    if (L.steps[sIdx].notif) notify(L.steps[sIdx].notif);
   });
+
+  function selectTab(mem) {
+    $("tab-plan").setAttribute("aria-selected", String(!mem));
+    $("tab-mem").setAttribute("aria-selected", String(mem));
+    $("body-plan").hidden = mem;
+    $("body-mem").hidden = !mem;
+    $("plan-pill").hidden = mem;
+    $("details").hidden = mem;
+  }
+  $("tab-plan").addEventListener("click", () => selectTab(false));
+  $("tab-mem").addEventListener("click", () => selectTab(true));
+
+  // ---------------------------------------------------------------- memory rows
+  const items = [];
+  const groups = [];
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; };
+  function detail(it) {
+    const m2 = el("div", "m2", it.ctx + (it.ctx && it.why ? " · " : ""));
+    if (it.why) m2.append(el("span", "why", it.why));
+    return m2;
+  }
+  L.groups.forEach(([label, rows]) => {
+    const wrap = el("div", "coll"), inner = el("div"), grp = el("div", "grp");
+    grp.append(el("div", "grp-h", label));
+    const g = { wrap, items: [] };
+    rows.forEach(([name, ctx, why, gb, size]) => {
+      const it = { name, ctx, why, gb, size, state: null };
+      it.wrap = el("div", "coll");
+      const wi = el("div");
+      it.row = el("div", "mrow");
+      const m1 = el("div", "m1");
+      const right = el("span", "mright");
+      const stop = el("button", "stop", L.stop);
+      stop.type = "button";
+      stop.addEventListener("click", () => stopItem(it));
+      right.append(el("span", "mv mono", size), stop);
+      m1.append(el("span", why ? "dot" : "dot none"), el("span", "mname", name), right);
+      it.m2 = detail(it);
+      it.row.append(m1, it.m2);
+      wi.append(it.row);
+      it.wrap.append(wi);
+      grp.append(it.wrap);
+      g.items.push(it);
+      items.push(it);
+    });
+    inner.append(grp);
+    wrap.append(inner);
+    $("groups").append(wrap);
+    groups.push(g);
+  });
+
+  function stopItem(it) {
+    if (it.state) return;
+    it.state = "stopping";
+    it.row.classList.add("stopping");
+    const line = el("div", "m2");
+    line.append(el("span", "shim", L.stopping));
+    it.m2.replaceWith(line);
+    it.m2 = line;
+    later(() => it.row.classList.add("leaving"), 1300);
+    later(() => {
+      it.state = "gone";
+      it.wrap.classList.add("gone");
+      freed += it.gb;
+      renderRam();
+      toast(it.name, it.size);
+      groups.forEach((g) => g.wrap.classList.toggle("gone", g.items.every((i) => i.state === "gone")));
+      if (items.every((i) => i.state === "gone")) {
+        $("empty").classList.remove("gone");
+        restoreT = setTimeout(restoreAll, 3200);
+      }
+    }, 1520);
+  }
+  function restoreAll() {
+    clearTimeout(restoreT);
+    freed = 0;
+    items.forEach((it) => {
+      it.state = null;
+      it.row.classList.remove("stopping", "leaving");
+      it.wrap.classList.remove("gone");
+      const m2 = detail(it);
+      it.m2.replaceWith(m2);
+      it.m2 = m2;
+    });
+    groups.forEach((g) => g.wrap.classList.remove("gone"));
+    $("empty").classList.add("gone");
+    renderRam();
+  }
+
+  // ---------------------------------------------------------------- tilt (decorative, fine pointers only)
+  const tilt = $("tilt");
+  if (fine) {
+    tilt.addEventListener("mousemove", (e) => {
+      const r = tilt.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+      tilt.style.transform = "perspective(900px) rotateX(" + (-y * 6).toFixed(2) + "deg) rotateY(" + (x * 6).toFixed(2) + "deg)";
+    });
+    tilt.addEventListener("mouseleave", () => { tilt.style.transform = ""; });
+  }
+
+  // ---------------------------------------------------------------- GitHub: stars on hover, live count when there is one
+  let starI = 0;
+  const ghBtn = $("gh-btn");
+  if (fine) {
+    $("gh").addEventListener("mouseenter", () => {
+      const add = () => {
+        const a = (-30 + Math.random() * 60) * Math.PI / 180, d = 30 + Math.random() * 35, c = (Math.random() - 0.5) * 40 * Math.PI / 180;
+        const s = el("span", "star", "★");
+        s.setAttribute("aria-hidden", "true");
+        s.style.setProperty("--tx", Math.round(Math.sin(a) * d + 10 * Math.sin(c)) + "px");
+        s.style.setProperty("--ty", Math.round(-Math.cos(a) * d) + "px");
+        s.style.setProperty("--dur", Math.round(500 + Math.random() * 300) + "ms");
+        s.style.fontSize = Math.round(7 + Math.random() * 5) + "px";
+        s.addEventListener("animationend", () => s.remove());
+        ghBtn.append(s);
+      };
+      add();
+      starI = setInterval(add, 160);
+    });
+    $("gh").addEventListener("mouseleave", () => clearInterval(starI));
+  }
+  fetch("https://api.github.com/repos/Romainl01/runway")
+    .then((r) => r.json())
+    .then((d) => { if (d.stargazers_count > 0) $("gh-meta").textContent = L.stars(d.stargazers_count); })
+    .catch(() => {});
+
+  // ---------------------------------------------------------------- terminal install
+  const copy = $("copy");
+  const copyLabel = copy.textContent;
+  copy.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(copy.title); } catch { return; }
+    copy.textContent = L.copied;
+    setTimeout(() => { copy.textContent = copyLabel; }, 1500);
+  });
+
+  // ---------------------------------------------------------------- entrance: the numbers pile up, then fall into the popover
+  const chaos = $("chaos");
+  const CH = "0123456789%:. ";
+  const scramble = (s, n) => [...s].map((ch, i) => (i < n || ch === " ") ? ch : CH[Math.floor(Math.random() * CH.length)]).join("");
+  let phase = "done", tickI = 0;
+
+  function reset() {
+    timers.splice(0).forEach(clearTimeout);
+    clearInterval(tickI);
+    clearTimeout(notifT); clearTimeout(toastT);
+    $("notif").classList.remove("on"); $("toast").classList.remove("on");
+    sIdx = 0; gaugesOn = false;
+    selectTab(false); restoreAll(); renderPlan();
+  }
+
+  function reveal() {
+    if (phase === "done") return;
+    phase = "done";
+    clearInterval(tickI);
+    html.classList.add("revealed");
+    chaos.classList.add("out");
+    later(() => { chaos.hidden = true; chaos.replaceChildren(); }, 450);
+    later(fillGauges, 450);
+  }
+
+  function intro() {
+    reset();
+    html.classList.remove("revealed");
+    if (reduce) { phase = "spawn"; reveal(); return; }
+    phase = "spawn";
+    chaos.replaceChildren();
+    chaos.hidden = false;
+    chaos.classList.remove("out");
+    const spans = [];
+    let tick = 0, gap = 180;
+    tickI = setInterval(() => {
+      tick++;
+      for (const s of spans) {
+        if (s.done) continue;
+        const n = Math.floor((tick - s.born) / 2);
+        s.done = n >= s.text.length;
+        s.el.textContent = s.done ? s.text : scramble(s.text, n);
+      }
+    }, 30);
+    const spawn = () => {
+      if (phase !== "spawn") return;
+      const text = L.tokens[Math.floor(Math.random() * L.tokens.length)];
+      const x = Math.round((0.06 + Math.random() * 0.88) * innerWidth), y = Math.round((0.08 + Math.random() * 0.84) * innerHeight);
+      const s = el("span", "ck mono");
+      s.style.left = x + "px"; s.style.top = y + "px"; s.style.transform = "translate(-50%, -50%)";
+      chaos.append(s);
+      spans.push({ el: s, text, x, y, born: tick, done: false });
+      gap = Math.max(20, gap * 0.9);
+      later(spawn, gap);
+    };
+    later(spawn, 120);
+    later(() => {
+      if (phase !== "spawn") return;
+      phase = "converge";
+      // Everything falls into the popover, where it ends up organised.
+      const r = $("pop").getBoundingClientRect();
+      const tx = r.left + r.width / 2, ty = r.top + r.height / 2 - 12;
+      for (const s of spans) {
+        s.el.style.transform = "translate(calc(-50% + " + (tx - s.x) + "px), calc(-50% + " + (ty - s.y) + "px)) scale(0.3)";
+        s.el.style.opacity = "0";
+        s.el.style.filter = "blur(6px)";
+      }
+      later(reveal, 650);
+    }, 2200);
+    later(reveal, 6000); // never leave the page hidden
+  }
+
+  chaos.addEventListener("click", () => { if (phase === "spawn" || phase === "converge") { timers.splice(0).forEach(clearTimeout); reveal(); } });
+  $("replay").addEventListener("click", () => { scrollTo({ top: 0 }); intro(); });
+
+  renderPlan(); renderRam();
+  intro();
+})();
 </script>
 </body>
 </html>
