@@ -40,7 +40,7 @@ if [[ -n "${RUNWAY_NOTARY_PROFILE:-}" ]]; then
 fi
 
 # sign_update prints: sparkle:edSignature="…" length="…"
-SIGN_UPDATE="$(swift build -c release --show-bin-path)/../../artifacts/sparkle/Sparkle/bin/sign_update"
+SIGN_UPDATE="$ROOT/.build/artifacts/sparkle/Sparkle/bin/sign_update"
 SIGNATURE="$("$SIGN_UPDATE" --account runway build/Runway.zip)"
 
 cat > build/appcast.xml <<XML

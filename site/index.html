@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Runway · Claude usage in your menu bar</title>
+<meta name="description" content="Your Claude plan usage, always in the menu bar. A free, open source macOS app.">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" href="images/icon.png">
+<meta property="og:title" content="Runway">
+<meta property="og:description" content="Your Claude plan usage, always in the menu bar.">
+<meta property="og:image" content="images/hero-dark.png">
+<style>
+  /* Tokens: the same values as Sources/Runway/Theme.swift. Dark first, like the app. */
+  :root {
+    --background: #0A0A0A;
+    --surface: #111111;
+    --border: #262626;
+    --text: #EDEDED;
+    --secondary: #A1A1A1;
+    --tertiary: #8A8A8A;
+
+    --size-title: 40px;
+    --size-body: 16px;
+    --size-small: 13px;
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-12: 48px;
+    --space-20: 80px;
+
+    --radius-control: 6px;
+    --radius-panel: 12px;
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --duration: 150ms;
+
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --background: #FFFFFF;
+      --surface: #FAFAFA;
+      --border: #EAEAEA;
+      --text: #171717;
+      --secondary: #666666;
+      --tertiary: #767676;
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    background: var(--background);
+    color: var(--text);
+    font: 400 var(--size-body)/1.6 var(--font);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  .page { max-width: 760px; margin: 0 auto; padding: 0 var(--space-6); }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: var(--space-6) 0;
+  }
+  .brand { display: flex; align-items: center; gap: var(--space-2); font-weight: 600; text-decoration: none; }
+  .brand img { width: 24px; height: 24px; border-radius: var(--radius-control); }
+  .link { color: var(--secondary); font-size: var(--size-small); text-decoration: none; }
+  .link:hover { color: var(--text); text-decoration: underline; }
+
+  .hero { padding: var(--space-20) 0 var(--space-12); text-align: center; }
+  h1 {
+    font-size: var(--size-title); line-height: 1.15; font-weight: 600;
+    letter-spacing: -0.02em; text-wrap: balance;
+  }
+  .lede { color: var(--secondary); margin: var(--space-4) auto 0; max-width: 520px; text-wrap: pretty; }
+
+  .download {
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    margin-top: var(--space-8); padding: var(--space-3) var(--space-6);
+    background: var(--text); color: var(--background);
+    border-radius: var(--radius-control);
+    font-weight: 500; text-decoration: none;
+    transition: opacity var(--duration) var(--ease-out);
+  }
+  .download:hover { opacity: 0.88; }
+  .download:active { opacity: 0.76; }
+  .download svg { width: 16px; height: 16px; }
+  .meta { margin-top: var(--space-3); color: var(--tertiary); font-size: var(--size-small); }
+
+  .shot { display: block; margin: 0 auto var(--space-20); }
+  .shot img {
+    display: block; width: 100%; height: auto;
+    border: 1px solid var(--border); border-radius: var(--radius-panel);
+  }
+
+  section { padding: var(--space-12) 0; border-top: 1px solid var(--border); }
+  h2 { font-size: var(--size-body); font-weight: 600; }
+  .features { list-style: none; padding: 0; margin-top: var(--space-6); display: grid; gap: var(--space-6); }
+  .features p, section > p { color: var(--secondary); }
+  section > p { margin-top: var(--space-2); }
+  .features strong { font-weight: 500; color: var(--text); }
+
+  .terminal {
+    display: flex; align-items: center; gap: var(--space-3);
+    margin-top: var(--space-4); padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-control);
+  }
+  .terminal code {
+    flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap;
+    font: var(--size-small)/1.6 var(--mono); color: var(--text);
+  }
+  .copy {
+    flex: none; padding: var(--space-1) var(--space-2);
+    background: none; border: 1px solid var(--border); border-radius: var(--radius-control);
+    color: var(--secondary); font: inherit; font-size: var(--size-small); cursor: pointer;
+  }
+  .copy:hover { color: var(--text); }
+
+  footer {
+    display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); justify-content: space-between;
+    padding: var(--space-8) 0 var(--space-12); border-top: 1px solid var(--border);
+    color: var(--tertiary); font-size: var(--size-small);
+  }
+  footer nav { display: flex; gap: var(--space-4); }
+
+  @media (max-width: 560px) {
+    :root { --size-title: 32px; }
+    .hero { padding-top: var(--space-12); }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <a class="brand" href="/"><img src="images/icon.png" alt="">Runway</a>
+    <a class="link" href="https://github.com/Romainl01/runway">GitHub</a>
+  </header>
+
+  <main>
+    <div class="hero">
+      <h1 data-i18n="title">Your Claude plan usage, always in the menu bar.</h1>
+      <p class="lede" data-i18n="lede">See how much of your 5-hour session and weekly limit is left at a glance, and get a heads-up before you hit the wall.</p>
+      <a class="download" href="https://github.com/Romainl01/runway/releases/latest/download/Runway.dmg">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8.5M4.5 7 8 10.5 11.5 7M3 13.5h10"/></svg>
+        <span data-i18n="download">Download for Mac</span>
+      </a>
+      <p class="meta" data-i18n="meta">Free and open source · macOS 26 or later · Apple silicon and Intel</p>
+    </div>
+
+    <picture class="shot">
+      <source media="(prefers-color-scheme: light)" srcset="images/hero-light.png">
+      <img src="images/hero-dark.png" width="1280" height="872" data-i18n-alt="shotAlt" alt="Runway's menu bar popover: session at 18%, weekly limit at 73%, reset times and a pace projection">
+    </picture>
+
+    <section>
+      <h2 data-i18n="featuresTitle">What it shows</h2>
+      <ul class="features">
+        <li><p data-i18n-html="f1"><strong>Every limit in one popover.</strong> Session, weekly, per-model weekly limits and extra usage credits, with reset times.</p></li>
+        <li><p data-i18n-html="f2"><strong>Where your pace leads.</strong> “At this pace: ~41% at reset”, or a warning when you are on track to hit 100% first.</p></li>
+        <li><p data-i18n-html="f3"><strong>A heads-up in time.</strong> Notifications at 50, 80 and 95%, once per window, and an optional notice when the session refills.</p></li>
+        <li><p data-i18n-html="f4"><strong>Colour only when it matters.</strong> Monochrome until 80%, amber from there, red from 95%. Follows light and dark mode.</p></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 data-i18n="setupTitle">Zero setup</h2>
+      <p data-i18n="setup">If Claude Code is installed and logged in on your Mac, Runway just works. Your token is read from your keychain, only ever sent to api.anthropic.com, and never stored. No account, no analytics.</p>
+    </section>
+
+    <section>
+      <h2 data-i18n="terminalTitle">Prefer the terminal?</h2>
+      <div class="terminal">
+        <code id="cmd">curl -fsSL https://raw.githubusercontent.com/Romainl01/runway/main/install.sh | bash</code>
+        <button class="copy" type="button" data-i18n="copy">Copy</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span data-i18n="disclaimer">MIT license. Not affiliated with Anthropic.</span>
+    <nav>
+      <a class="link" href="https://github.com/Romainl01/runway/releases" data-i18n="releases">Releases</a>
+      <a class="link" href="https://github.com/Romainl01/runway">GitHub</a>
+    </nav>
+  </footer>
+</div>
+
+<script>
+  // English is the source; French follows the browser language, like the app follows the Mac's.
+  const fr = {
+    title: "La conso de votre forfait Claude, toujours dans la barre de menus.",
+    lede: "Voyez d’un coup d’œil ce qu’il reste de votre session de 5 h et de votre limite hebdo, et soyez prévenu avant d’arriver au bout.",
+    download: "Télécharger pour Mac",
+    meta: "Gratuit et open source · macOS 26 ou plus récent · Apple silicon et Intel",
+    shotAlt: "Le panneau de Runway dans la barre de menus : session à 18 %, limite hebdo à 73 %, heures de reset et projection du rythme",
+    featuresTitle: "Ce qu’il affiche",
+    f1: "<strong>Toutes les limites dans un panneau.</strong> Session, semaine, limites hebdo par modèle et crédits d’usage, avec les heures de reset.",
+    f2: "<strong>Où mène votre rythme.</strong> « À ce rythme : ~41 % au reset », ou une alerte si vous allez atteindre 100 % avant.",
+    f3: "<strong>Prévenu à temps.</strong> Notifications à 50, 80 et 95 %, une fois par fenêtre, et en option quand la session se recharge.",
+    f4: "<strong>De la couleur seulement quand ça compte.</strong> Monochrome jusqu’à 80 %, ambre ensuite, rouge dès 95 %. Suit le mode clair et sombre.",
+    setupTitle: "Rien à configurer",
+    setup: "Si Claude Code est installé et connecté sur votre Mac, Runway marche tout seul. Votre token est lu dans le Trousseau, envoyé uniquement à api.anthropic.com et jamais stocké. Pas de compte, pas d’analytics.",
+    terminalTitle: "Plutôt le terminal ?",
+    copy: "Copier",
+    copied: "Copié",
+    disclaimer: "Licence MIT. Non affilié à Anthropic.",
+    releases: "Versions",
+  };
+  const t = navigator.language.startsWith("fr") ? fr : null;
+  if (t) {
+    document.documentElement.lang = "fr";
+    document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t[el.dataset.i18n]);
+    document.querySelectorAll("[data-i18n-html]").forEach(el => el.innerHTML = t[el.dataset.i18nHtml]);
+    document.querySelectorAll("[data-i18n-alt]").forEach(el => el.alt = t[el.dataset.i18nAlt]);
+  }
+
+  const copy = document.querySelector(".copy");
+  const label = copy.textContent;
+  copy.addEventListener("click", async () => {
+    await navigator.clipboard.writeText(document.getElementById("cmd").textContent);
+    copy.textContent = t ? t.copied : "Copied";
+    setTimeout(() => copy.textContent = label, 1500);
+  });
+</script>
+</body>
+</html>

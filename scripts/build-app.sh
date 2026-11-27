@@ -41,7 +41,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
     <key>LSUIElement</key><true/>
     <key>LSApplicationCategoryType</key><string>public.app-category.developer-tools</string>
     <key>SUFeedURL</key><string>https://github.com/Romainl01/runway/releases/latest/download/appcast.xml</string>
-    <key>SUPublicEDKey</key><string>c13CU4cXw1rDc3VtxQx70ste+8i590ntjGKq5UqmU3M=</string>
+    <key>SUPublicEDKey</key><string>zueBxSsaUNfu8rKInRG2ttOYmmn3DiylQsOxGFbbMWE=</string>
     <key>SUEnableAutomaticChecks</key><true/>
     <key>NSHumanReadableCopyright</key><string>© 2026 Romain Lagrange</string>
 </dict>
